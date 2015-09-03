@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
         } else if (t.type != ERROR) {
             fout<<t.value<<" ";
         } else {
-            cout<<"Error: "<<t.value<<" is not a valid token!\n";
+            cout<<"Error in "<<argv[1]<<": "<<t.value<<" is not a valid token!\n";
             break;
         }
     }

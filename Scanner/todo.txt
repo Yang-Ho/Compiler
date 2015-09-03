@@ -1,2 +1,0 @@
-Implement details:
-take a look at ifstream: tellg, get, peek.

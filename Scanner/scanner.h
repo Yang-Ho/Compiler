@@ -67,7 +67,6 @@ Token Scanner::GetNextToken() {
             break;
         }
 
-        //cout<<next<<'\n';
         nextWhiteSpace = false;
 
         switch(state) {
@@ -79,7 +78,6 @@ Token Scanner::GetNextToken() {
                     state = 2;
                 } 
                 else if (IsOfType(next, SINGLESYMBOL)) {
-                    //cout<<"SYMBOL"<<'\n';
                     state = 3;
                 } 
                 else if (IsOfType(next, COMPARISON)) {
@@ -131,16 +129,22 @@ Token Scanner::GetNextToken() {
             case 5: // SYMBOL token !=
                 if (next != '=') {
                     state = -2;
+                } else {
+                    state = -1;
                 }
                 break;
             case 6: // SYMBOL token &&
                 if (next != '&') {
                     state = -2;
+                } else {
+                    state = -1;
                 }
                 break;
             case 7: // SYMBOL token ||
                 if (next != '|') {
                     state = -2;
+                } else {
+                    state = -1;
                 }
                 break;
             case 8: // SYMBOL token /
@@ -158,13 +162,22 @@ Token Scanner::GetNextToken() {
             case 10: // STRING token
                 if (next == '"') {
                     state = -1;
-                } else if (next == '\n') {
+                } else if (next == '\n' || next == EOF) {
                     state = -2;
                 }
                 break;
         }
         if (!nextWhiteSpace) {
             if (state > -1) {
+                input.get(next);
+                value += next;
+            } else if (previousState == 5) {
+                input.get(next);
+                value += next;
+            } else if (previousState == 6) {
+                input.get(next);
+                value += next;
+            } else if (previousState == 7) {
                 input.get(next);
                 value += next;
             } else if (previousState == 9) {
@@ -180,6 +193,7 @@ Token Scanner::GetNextToken() {
             Token error;
             error.type = ERROR;
             error.value = value;
+            return error;
         }
     }
 

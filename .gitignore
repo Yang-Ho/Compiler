@@ -1,1 +1,5 @@
 *.tar
+*.swp
+
+Scanner/tests/gen/*
+Scanner/tests/outputs/*
