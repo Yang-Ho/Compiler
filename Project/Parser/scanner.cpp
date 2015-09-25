@@ -1,65 +1,39 @@
-#ifndef SCANNER_H
-#define SCANNER_H 
-
-//#include "token.h"
-
-#include <fstream>
-#include <string>
-#include <iostream>
-#include <vector>
-#include <algorithm>
+#include "scanner.h"
+#include "token.h"
 
 using namespace::std;
 
-static const string DIGITS("0123456789");
-static const string LETTERS("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_");
-static const string SINGLESYMBOL("){(}[],;+-*");
-static const string COMPARISON("<>=");
-static const string WHITESPACE(" \n\t");
-static const string RESERVED_WORDS[12] = {"int","void","if","while","return","read","write","print","continue","break","binary","decimal"};
-
+// Function to check if a char is of a specific type
 bool IsOfType( char c, string toSearch ) {
     size_t location = toSearch.find(c);
     return (location != string::npos);
 }
 
-typedef enum{
-    ID = 1,
-    NUMBER,
-    RESERVED,
-    SYMBOL,
-    STRING,
-    META,
-    ERROR
-} TokenType;
-
-typedef struct {
-    TokenType type;
-    string value;
-} Token;
-
-class Scanner {
-    private:
-        ifstream input;
-        string fileName;
-    public:
-        Scanner(string file) { input.open(file.c_str()); };
-        bool HasMoreTokens();
-        Token GetNextToken();
+Scanner::Scanner(string file) {
+    input.open(file.c_str());
 };
 
+Scanner::~Scanner() {
+    input.close();
+}
+
+// Scanner
 Token Scanner::GetNextToken() {
+    // Initialize variables
     string value = "";
 
     char next;
     int state = 0;
     int previousState = 0;
     bool nextWhiteSpace = false;
+    bool valid = true;
 
     while (state > -1) {
         previousState = state;
+        // Check if input is at eof
         if (!input.eof()) {
             next = input.peek();
+            //input.get(next);
             if (next == EOF) {
                 break;
             }
@@ -67,10 +41,12 @@ Token Scanner::GetNextToken() {
             break;
         }
 
+        // Bool that handles if input is a white space
         nextWhiteSpace = false;
 
+        // DFA iteration
         switch(state) {
-            case 0:
+            case 0: // Start state
                 if (IsOfType(next, LETTERS)) {
                     state = 1;
                 }
@@ -102,9 +78,10 @@ Token Scanner::GetNextToken() {
                     state = 10;
                 } 
                 else if (IsOfType(next, WHITESPACE)) {
-                    input.get(next);
+                    //input.get(next);
                     nextWhiteSpace = true;
                 } else {
+                    valid = false;
                     state = -2;
                 }
                 break;
@@ -128,23 +105,26 @@ Token Scanner::GetNextToken() {
                 break;
             case 5: // SYMBOL token !=
                 if (next != '=') {
+                    valid = false;
                     state = -2;
                 } else {
-                    state = -1;
+                    state = 11;
                 }
                 break;
             case 6: // SYMBOL token &&
                 if (next != '&') {
+                    valid = false;
                     state = -2;
                 } else {
-                    state = -1;
+                    state = 11;
                 }
                 break;
             case 7: // SYMBOL token ||
                 if (next != '|') {
+                    valid = false;
                     state = -2;
                 } else {
-                    state = -1;
+                    state = 11;
                 }
                 break;
             case 8: // SYMBOL token /
@@ -156,50 +136,47 @@ Token Scanner::GetNextToken() {
                 break;
             case 9: // META token
                 if (next == '\n') {
-                    state = -1;
+                    state = 11;
                 }
                 break;
             case 10: // STRING token
                 if (next == '"') {
-                    state = -1;
+                    state = 11;
                 } else if (next == '\n' || next == EOF) {
+                    valid = false;
                     state = -2;
                 }
                 break;
+            case 11:
+                state = -1;
+                break;
         }
+        
+        // For some tokens, you need to consume input or ignore it
         if (!nextWhiteSpace) {
-            if (state > -1) {
-                input.get(next);
-                value += next;
-            } else if (previousState == 5) {
-                input.get(next);
-                value += next;
-            } else if (previousState == 6) {
-                input.get(next);
-                value += next;
-            } else if (previousState == 7) {
-                input.get(next);
-                value += next;
-            } else if (previousState == 9) {
-                input.get(next);
-                value += next;
-            } else if (previousState == 10) {
+            if (valid && state > -1) {
                 input.get(next);
                 value += next;
             }
+        } else {
+            input.get(next);
         }
 
+        // Handle error state
         if (state == -2) {
             Token error;
             error.type = ERROR;
-            error.value = value;
+            error.value = value + next;
             return error;
+        } else if (state == 11) {
+            state = -1;
         }
     }
 
+    // Determine token type and return token
     Token token;
     switch(previousState) {
-        case 1:
+        case 1: // Check if ID matches a reserved word
             if (find(RESERVED_WORDS, RESERVED_WORDS+12, value) != RESERVED_WORDS+12) {
                 token.type = RESERVED;
             } else {
@@ -232,6 +209,7 @@ Token Scanner::GetNextToken() {
     return token;
 }
 
+// Check if input has more input
 bool Scanner::HasMoreTokens() {
     if (input.eof()) {
         return false;
@@ -239,4 +217,3 @@ bool Scanner::HasMoreTokens() {
         return true;
     }
 }
-#endif /* SCANNER_H */
