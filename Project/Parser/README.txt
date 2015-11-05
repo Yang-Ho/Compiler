@@ -1,0 +1,113 @@
+Contains the following files:
+scanner.h, scanner.cpp, parser.h, parser.cpp, main.cpp, and token.h
+
+To compile:
+g++ main.cpp parser.cpp scanner.cpp -o parser
+
+To run:
+./parser <TEST FILE NAME>
+
+Output:
+
+Input file: <TEST FILE NAME> 
+Pass variable # functions # statement #
+
+Error:
+- If error is with scanner, it will say so
+- If error has to do with parsing, it will say "Failed to parse" or something similar
+
+Parser Implementation:
+- I used recursive descent parsing
+- For the stack I used a vector of tokens and used a variable tIndex to keep track of 
+the position of the supposed "top of stack"
+- I chose to ignore META statements but not including them into the parsing vector
+
+The reason I turned it in late was because I thought it was due on tuesday
+
+
+Rewritten Grammar: (42 Non-Terminals, 83 production rules) (I typed the grammar instead of hand writing)
+<program>               --> <type name> ID <program prime>
+<program prime>         --> ( <parameter list> ) <func tail> <func list>
+                        | <id tail> <id list prime> ; <program>  
+<func list>             --> empty
+                        | <func> <func list>
+<func>                  --> <func decl> <func tail>
+<func tail>             --> ;
+                        | { <data decls> <statements> }
+<func decl>             --> <type name> ID ( <parameter list> )
+<type name>             --> int
+                        | void
+                        | binary
+                        | decimal
+<parameter list>        --> empty
+                        | void
+                        | <non-empty list>
+<non-empty list>        --> <type name> ID <non-empty list*>
+<non-empty list*>       --> , <type name> ID <non-empty list*>
+                        | empty
+<data decls>            --> empty
+                        | <type name> <id list> ; <data decls>
+<id list>               --> <id> <id list*>
+<id list*>              --> , <id> <id list*>
+                        --> empty
+<id>                    --> ID <id tail>
+<id tail>               --> empty
+                        | [ <expression> ]
+<block statements>      --> { <statements> }
+<statements>            --> empty
+                        | <statement> <statements>
+<statement>             --> ID <statement tail> 
+                        | <if statement>
+                        | <while statement>
+                        | <return statement>
+                        | <break statement>
+                        | <continue statement>
+                        | read ( ID ) ;
+                        | write ( <expression> ) ;
+                        | print ( STRING ) ;
+<statement tail>        --> <assignment tail>
+                        | ( <expr list> ) ;
+<assignment tail>       --> = <expression> ;
+                        | [ <expression> ] = <expression> ;
+<func call>             --> ID ( <expr list> ) ;
+<expr list>             --> empty
+                        | <non-empty expr list>
+<non-empty expr list>   --> <expression> <non-empty expr list*>
+<non-empty expr list*>  --> , <expression> <non-empty expr list*>
+                        | empty
+<if statement>          --> if ( <condition expression> ) <block statements>
+<condition expression>  --> <condition> <condition expression tail>
+<condition expr tail>   --> empty
+                        | <condition op> <condition>
+<condition op>          --> &&
+                        | ||
+<condition>             --> <expression> <comparison op> <expression>
+<comparison op>         --> ==
+                        | !=
+                        | >
+                        | >=
+                        | <
+                        | <=
+<while statement>       --> while ( <condition expression> ) <block statements>
+<return statement>      --> return <expression> ;
+<break statement>       --> break ;
+<continue statement>    --> continue ;
+<expression>            --> <term> <expression*>
+<expression*>           --> <addop> <term> <expression*>
+                        | empty
+<addop>                 --> +
+                        | -
+<term>                  --> <factor> <term*>
+<term*>                 --> <mulop> <factor> <term*>
+                        | empty
+<mulop>                 --> *
+                        | /
+<factor>                --> ID <factor tail>
+                        | NUMBER
+                        | - NUMBER
+                        | ( <expression> )
+<factor tail>           --> empty
+                        | [ <expression> ]
+                        | ( <expr list> )
+
+

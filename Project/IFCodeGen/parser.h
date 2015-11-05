@@ -1,16 +1,23 @@
 #ifndef PARSER_H
 #define PARSER_H 
 
-#include <vector>
 #include "token.h"
+#include "compiler.h"
+
+#include <string>
+#include <vector>
 
 using namespace::std;
 
-extern vector< Token > tokens;
-extern int tIndex;
+extern Token currToken;
+extern Compiler compiler;
 extern int num_variables;
 extern int num_functions;
 extern int num_statements;
+
+bool Parse(string);
+
+void Consume(Token);
 
 bool Program();
 

@@ -1,46 +1,71 @@
--Input file: tests/automaton.c
-Pass variable 5 functions 9 statement 48
--Input file: tests/binrep.c
+Input file: tests/automaton.c
+Leftover: 
+Pass variable 5 functions 13 statement 48
+Input file: tests/binrep.c
+Leftover: 
 Pass variable 2 functions 2 statement 21
--Input file: tests/branch.c
+Input file: tests/branch.c
+Leftover: 
 Pass variable 2 functions 0 statement 6
--Input file: tests/errorString.c
+Input file: tests/errorString.c
 Scanner Error in tests/errorString.c: % is an invalid token!
--Input file: tests/expression.c
+Input file: tests/expression.c
+Leftover: 
 Pass variable 2 functions 0 statement 3
--Input file: tests/fibonacci.c
-Pass variable 5 functions 1 statement 19
+Input file: tests/fibonacci.c
+Leftover: 
+Pass variable 5 functions 1 statement 17
 Input file: tests/formulae.c
+Leftover: 
 Pass variable 12 functions 0 statement 31
 Input file: tests/funcall.c
+Leftover: 
 Pass variable 1 functions 0 statement 10
 Input file: tests/funcall2.c
+Leftover: 
 Pass variable 1 functions 0 statement 7
 Input file: tests/illegal.c
-Pass variable 2 functions 0 statement 0
+Leftover: 
+Pass variable 4 functions 1 statement 15
 Input file: tests/loop.c
+Leftover: 
 Pass variable 2 functions 0 statement 6
 Input file: tests/mandel.c
+Leftover: 
 Pass variable 8 functions 0 statement 34
 Input file: tests/max.c
+Leftover: 
 Pass variable 2 functions 0 statement 6
 Input file: tests/parameter.c
+Leftover: 
 Pass variable 1 functions 1 statement 5
 Input file: tests/parse.c
+Leftover: ==
+Leftover: y
+Leftover: ;
+Leftover: }
+Leftover: 
 Pass variable 4 functions 2 statement 8
 Input file: tests/parse2.c
 Scanner Error in tests/parse2.c: @ is an invalid token!
 Input file: tests/polymorphism.c
+Leftover: 
 Pass variable 2 functions 2 statement 6
 Input file: tests/recursion.c
+Leftover: 
 Pass variable 1 functions 0 statement 5
 Input file: tests/sort.c
-Pass variable 4 functions 0 statement 0
+Leftover: 
+Pass variable 9 functions 3 statement 127
 Input file: tests/square.c
+Leftover: 
 Pass variable 2 functions 0 statement 6
 Input file: tests/tax.c
+Leftover: 
 Pass variable 24 functions 0 statement 87
 Input file: tests/times8.c
+Leftover: 
 Pass variable 2 functions 0 statement 4
 Input file: tests/trivial.c
+Leftover: 
 Pass variable 1 functions 1 statement 3

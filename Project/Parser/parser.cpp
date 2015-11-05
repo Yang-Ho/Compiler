@@ -1,3 +1,8 @@
+/* 
+ * My recursive descent parser
+ * uses a vector of all tokens and an index tIndex as a reference to the 
+ * "top of stack" token
+ */
 #include "scanner.h"
 #include "parser.h"
 #include "token.h"
@@ -13,12 +18,42 @@ int num_statements = 0;
 
 bool Program() {
     //cout<<"Program, "<<tokens[tIndex].value<<endl;
-    tIndex = 0;
-    if (Data_Decls()) {
-        return Func_List();
+    if (Type_Name()) {
+        if (tokens[tIndex].type == ID) {
+            tIndex++;
+            if (Program_Prime()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool Program_Prime() {
+    //cout<<"Program Prime, "<<tokens[tIndex].value<<endl;
+    if (tokens[tIndex].value == "(") {
+        tIndex++;
+        if (Parameter_List()) {
+            if (tokens[tIndex].value == ")") {
+                tIndex++;
+                if (Func_Tail()) {
+                    if (Func_List()) {
+                        return true;
+                    }
+                }
+            }
+        }
+    } else if (Id_Tail()) {
+        if (Id_List_Prime()) {
+            if (tokens[tIndex].value == ";") {
+                tIndex++;
+                if (Program()) {
+                    return true;
+                }
+            }
+        }
     } else {
-        tIndex = 0;
-        return Func_List();
+        return true;
     }
     return false;
 }
@@ -38,17 +73,26 @@ bool Func_List() {
 bool Func() {
     //cout<<"Func, "<<tokens[tIndex].value<<endl;
     if (Func_Decl()) {
-        if (tokens[tIndex].value == ";") {
-            tIndex++;
+        if (Func_Tail()) {
             return true;
-        } else if (tokens[tIndex].value == "{") {
-            tIndex++;
-            if (Data_Decls()) {
-                if (Statements()) {
-                    if (tokens[tIndex].value == "}") {
-                        tIndex++;
-                        return true;
-                    }
+        }
+    }
+    return false;
+}
+
+bool Func_Tail() {
+    //cout<<"Func Tail, "<<tokens[tIndex].value<<endl;
+    if (tokens[tIndex].value == ";") {
+        tIndex++;
+        return true;
+    } else if (tokens[tIndex].value == "{") {
+        tIndex++;
+        if (Data_Decls()) {
+            if (Statements()) {
+                if (tokens[tIndex].value == "}") {
+                    tIndex++;
+                    num_functions++;
+                    return true;
                 }
             }
         }
@@ -95,7 +139,7 @@ bool Type_Name() {
 }
 
 bool Parameter_List() {
-    //cout<<"Parameter_list, "<<tokens[tIndex].value<<endl;
+    //cout<<"Parameter_List, "<<tokens[tIndex].value<<endl;
     if (tokens[tIndex].value == "void") {
         tIndex++;
         return true;
@@ -141,7 +185,9 @@ bool Data_Decls() {
         if (Id_List()) {
             if (tokens[tIndex].value == ";") {
                 tIndex++;
-                return Data_Decls();
+                if (Data_Decls()) {
+                    return true;
+                }
             }
         }
     } else {
@@ -164,6 +210,7 @@ bool Id_List_Prime() {
     //cout<<"Id_List_Prime, "<<tokens[tIndex].value<<endl;
     if (tokens[tIndex].value == ",") {
         tIndex++;
+        num_variables++;
         if (Id()) {
             if (Id_List_Prime()) {
                 return true;
@@ -180,19 +227,25 @@ bool Id() {
     //cout<<"Id, "<<tokens[tIndex].value<<endl;
     if (tokens[tIndex].type == ID) {
         tIndex++;
-        if (tokens[tIndex].value == "[") {
-            tIndex++;
-            if (Expression()) {
-                if (tokens[tIndex].value == "]") {
-                    tIndex++;
-                    return true;
-                }
-            }
-        } else if (tokens[tIndex].value != "(") {
+        if (Id_Tail()) {
             return true;
-        } else {
-            tIndex--;
         }
+    }
+    return false;
+}
+
+bool Id_Tail() {
+    //cout<<"Id Tail, "<<tokens[tIndex].value<<endl;
+    if (tokens[tIndex].value == "[") {
+        tIndex++;
+        if (Expression()) {
+            if (tokens[tIndex].value == "]") {
+                tIndex++;
+                return true;
+            }
+        }
+    } else if (tokens[tIndex].value != "(") {
+        return true;
     }
     return false;
 }
@@ -226,10 +279,11 @@ bool Statements() {
 bool Statement() {
     //cout<<"Statement, "<<tokens[tIndex].value<<endl;
     num_statements++;
-    if (Assignment()) {
-        return true;
-    } else if (Func_Call()) {
-        return true;
+    if (tokens[tIndex].type == ID) {
+        tIndex++;
+        if (Statement_Tail()) {
+            return true;
+        }
     } else if (If_Statement()) {
         return true;
     } else if (While_Statement()) {
@@ -289,15 +343,46 @@ bool Statement() {
     return false;
 }
 
-bool Assignment() {
-    //cout<<"Assignment, "<<tokens[tIndex].value<<endl;
-    if (Id()) {
-        if (tokens[tIndex].value == "=") {
-            tIndex++;
-            if (Expression()) {
+bool Statement_Tail() {
+    if (Assignment_Tail()) {
+        return true;
+    } else if (tokens[tIndex].value == "(") {
+        tIndex++;
+        if (Expr_List()) {
+            if (tokens[tIndex].value == ")") {
+                tIndex++;
                 if (tokens[tIndex].value == ";") {
                     tIndex++;
                     return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool Assignment_Tail() {
+    if (tokens[tIndex].value == "=") {
+        tIndex++;
+        if (Expression()) {
+            if (tokens[tIndex].value == ";") {
+                tIndex++;
+                return true;
+            }
+        }
+    } else if (tokens[tIndex].value == "[") {
+        tIndex++;
+        if (Expression()) {
+            if (tokens[tIndex].value == "]") {
+                tIndex++;
+                if (tokens[tIndex].value == "=") {
+                    tIndex++;
+                    if (Expression()) {
+                        if (tokens[tIndex].value == ";") {
+                            tIndex++;
+                            return true;
+                        }
+                    }
                 }
             }
         }
@@ -393,6 +478,16 @@ bool Condition_Expression() {
     return false;
 }
        
+bool Condition_Expression_Tail() {
+        if (Condition_Op()) {
+            if (Condition()) {
+                return true;
+            }
+        } else {
+            return true;
+        }
+}
+
 bool Condition_Op() {
     //cout<<"Condition_Op, "<<tokens[tIndex].value<<endl;
     if (tokens[tIndex].value == "&&") {
@@ -613,6 +708,29 @@ bool Factor() {
                 return true;
             }
         }
+    }
+    return false;
+}
+
+bool Factor_Tail() {
+    if (tokens[tIndex].value == "[") {
+        tIndex++;
+        if (Expression()) {
+            if (tokens[tIndex].value == "]") {
+                tIndex++;
+                return true;
+            }
+        }
+    } else if (tokens[tIndex].value == "(") {
+        tIndex++;
+        if (Expr_List()) {
+            if (tokens[tIndex].value == ")") {
+                tIndex++;
+                return true;
+            }
+        }
+    } else {
+        return true;
     }
     return false;
 }

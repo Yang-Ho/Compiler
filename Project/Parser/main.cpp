@@ -2,7 +2,7 @@
  * Yang Ho
  * CSC 512
  * Scanner Project
- * 9/8/2015
+ * 9/28/2015
  */
 #include "scanner.h"
 #include "parser.h"
@@ -22,6 +22,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    cout<<"Input file: "<<argv[1]<<"\n";
     // Initialize scanner and prepare output file
     Scanner scanner(argv[1]);
 
@@ -30,22 +31,23 @@ int main(int argc, char* argv[]) {
     while (scanner.HasMoreTokens()) {
         Token t = scanner.GetNextToken();
         if (t.type == ERROR) {
-            cout<<"Error in "<<argv[1]<<": "<<t.value<<" is an invalid token!\n";
+            cout<<"Scanner Error in "<<argv[1]<<": "<<t.value<<" is an invalid token!\n";
             error = true;
             break;
-        } else if (t.type != META) {
+        } else if (t.type != META){
             tokens.push_back(t);
         }
     }
+    // Parse program
     if (!error) {
-        cout<<"Checking if valid program!\n";
         if (Program()) {
-            for (int i = tIndex; i < tokens.size(); i++) {
-                cout<<"Leftover: "<<tokens[i].value<<"\n";
+            if (tokens[tIndex].value == tokens.back().value) {
+                cout<<"Pass variable "<<num_variables<<" functions "<<num_functions<<" statement "<<num_statements<<endl;
+            } else {
+                cout<<"Failed to parse: "<<tokens[tIndex].value<<"\n";
             }
-            cout<<"Pass variable "<<num_variables<<" functions "<<num_functions<<" statement "<<num_statements<<endl;
         } else {
-            cout<<"ERRORRJ:AKDFJ\n";
+            cout<<"Failed to parse\n";
         }
     }
 
