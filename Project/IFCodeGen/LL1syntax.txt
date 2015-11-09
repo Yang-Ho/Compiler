@@ -42,7 +42,7 @@
                         | <func call tail>
 <assignment tail>       --> = <expression> ;
                         | [ <expression> ] = <expression> ;
-<func call tail>        --> ( <expr list> ) ;
+<func call tail>             --> ( <expr list> ) ;
 <expr list>             --> empty
                         | <non-empty expr list>
 <non-empty expr list>   --> <expression> <non-empty expr list*>

@@ -1,5 +1,5 @@
-#ifndef COMPILER_H
-#define COMPILER_H 
+#ifndef SCANNER_H
+#define SCANNER_H 
 
 #include "token.h"
 
@@ -20,20 +20,20 @@ static const string WHITESPACE(" \n\t");
 static const string RESERVED_WORDS[12] = {"int","void","if","while","return","read","write","print","continue","break","binary","decimal"};
 // Other symbols: !, &, |, /, #, "
 
+// Function to check if a char is of a specific type
 bool IsOfType( char c, string toSearch );
 
-class Compiler{
+// Scanner
+class Scanner {
     private:
-        ifstream input;
-        ofstream output;
-        string inputFile;
-        string outputFile;
+        ifstream input; // input stream 
+        string inputFile; // input file name
+        bool EOFFlag;
     public:
-        Compiler(string);
-        ~Compiler();
-        // Scanner section
+        Scanner(string file);
+        ~Scanner();
         bool HasMoreTokens();
-        Token GetNextToken();
+        Token* GetNextToken();
 };
 
-#endif /* COMPILER_H */
+#endif /* SCANNER_H */

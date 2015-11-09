@@ -1,34 +1,26 @@
-#include "token.h"
-#include "compiler.h"
-
-#include <fstream>
-#include <string>
-#include <iostream>
-#include <vector>
-#include <algorithm>
+#include "scanner.h"
 
 using namespace::std;
 
+// Function to check if a char is of a specific type
 bool IsOfType( char c, string toSearch ) {
     size_t location = toSearch.find(c);
     return (location != string::npos);
 }
 
-Compiler::Compiler(string file) {
+Scanner::Scanner(string file) {
     inputFile = file;
-    outputFile = inputFile.substr(0, inputFile.find("."));
-    outputFile += "_gen.c";
-
     input.open(inputFile.c_str());
-    output.open(outputFile.c_str());
-}
+    EOFFlag = false;
+};
 
-Compiler::~Compiler() {
+Scanner::~Scanner() {
     input.close();
-    output.close();
 }
 
-Token Compiler::GetNextToken() {
+// Scanner
+Token* Scanner::GetNextToken() {
+    // Initialize variables
     string value = "";
 
     char next;
@@ -44,6 +36,7 @@ Token Compiler::GetNextToken() {
             next = input.peek();
             //input.get(next);
             if (next == EOF) {
+                EOFFlag = true;
                 break;
             }
         } else {
@@ -154,6 +147,7 @@ Token Compiler::GetNextToken() {
                 } else if (next == '\n' || next == EOF) {
                     valid = false;
                     state = -2;
+                    EOFFlag = true;
                 }
                 break;
             case 11:
@@ -173,9 +167,9 @@ Token Compiler::GetNextToken() {
 
         // Handle error state
         if (state == -2) {
-            Token error;
-            error.type = TOKEN_ERROR;
-            error.value = value + next;
+            Token* error = new Token(value + next, TOKEN_ERROR);
+            //error->type = TOKEN_ERROR;
+            //error->value = value + next;
             return error;
         } else if (state == 11) {
             state = -1;
@@ -183,19 +177,20 @@ Token Compiler::GetNextToken() {
     }
 
     // Determine token type and return token
-    Token token;
+    int new_type;
+    string new_value;
     switch(previousState) {
         case 1: // Check if ID matches a reserved word
             if (find(RESERVED_WORDS, RESERVED_WORDS+12, value) != RESERVED_WORDS+12) {
-                token.type = TOKEN_RESERVED;
+                new_type = TOKEN_RESERVED;
             } else {
-                token.type = TOKEN_ID;
+                new_type = TOKEN_ID;
             }
-            token.value = value;
+            new_value = value;
             break;
         case 2:
-            token.type = TOKEN_NUMBER;
-            token.value = value;
+            new_type = TOKEN_NUMBER;
+            new_value = value;
             break;
         case 3:
         case 4:
@@ -203,23 +198,25 @@ Token Compiler::GetNextToken() {
         case 6:
         case 7:
         case 8:
-            token.type = TOKEN_SYMBOL;
-            token.value = value;
+            new_type = TOKEN_SYMBOL;
+            new_value = value;
             break;
         case 9:
-            token.type = TOKEN_META;
-            token.value = value;
+            new_type = TOKEN_META;
+            new_value = value;
             break;
         case 10:
-            token.type = TOKEN_STRING;
-            token.value = value;
+            new_type = TOKEN_STRING;
+            new_value = value;
             break;
     }
+    Token * token = new Token(new_value, new_type);
     return token;
 }
 
-bool Compiler::HasMoreTokens() {
-    if (input.eof()) {
+// Check if input has more input
+bool Scanner::HasMoreTokens() {
+    if (input.eof() || !input.good()) {
         return false;
     } else {
         return true;

@@ -1,0 +1,26 @@
+Input file: ../tests/automaton.c, Pass variable 5 functions 6 statement 48
+Input file: ../tests/binrep.c, Pass variable 2 functions 2 statement 21
+Input file: ../tests/branch.c, Pass variable 2 functions 1 statement 6
+Input file: ../tests/errorString.c, Error
+Input file: ../tests/expression.c, Pass variable 2 functions 1 statement 3
+Input file: ../tests/fibonacci.c, Falied to parse
+* Input file: ../tests/foo.c, Pass variable 1 functions 1 statement 3
+Input file: ../tests/formulae.c, Pass variable 12 functions 2 statement 31
+Input file: ../tests/funcall.c, Pass variable 1 functions 8 statement 10
+Input file: ../tests/funcall2.c, Pass variable 1 functions 5 statement 7
+*Input file: ../tests/gen, Falied to parse
+*Input file: ../tests/illegal.c, Falied to parse
+Input file: ../tests/loop.c, Pass variable 2 functions 1 statement 6
+Input file: ../tests/mandel.c, Pass variable 8 functions 6 statement 34
+Input file: ../tests/max.c, Pass variable 2 functions 2 statement 6
+*Input file: ../tests/outputs, Falied to parse
+Input file: ../tests/parameter.c, Pass variable 1 functions 2 statement 5
+*Input file: ../tests/parse.c, Pass variable 4 functions 2 statement 8
+Input file: ../tests/parse2.c, Error
+Input file: ../tests/polymorphism.c, Pass variable 2 functions 2 statement 6
+Input file: ../tests/recursion.c, Pass variable 1 functions 2 statement 5
+*Input file: ../tests/sort.c, Falied to parse
+Input file: ../tests/square.c, Pass variable 2 functions 2 statement 6
+Input file: ../tests/tax.c, Pass variable 24 functions 2 statement 87
+Input file: ../tests/times8.c, Pass variable 2 functions 3 statement 4
+Input file: ../tests/trivial.c, Pass variable 1 functions 2 statement 3
