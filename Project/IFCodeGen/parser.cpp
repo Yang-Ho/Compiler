@@ -27,6 +27,7 @@ Parser::~Parser() {
 }
 
 Token* Parser::Consume(TokenType t_type) {
+    //cout<<"Consuming: "<<(*tokenIT)->GetTokenValue()<<"\n";
     ++tokenIT;
     while (tokenIT != tokens->end() && (*tokenIT)->GetTokenType() == TOKEN_META) {
         ++tokenIT;
