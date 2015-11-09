@@ -29,13 +29,13 @@ int main(int argc, char* argv[]) {
     
     Scanner scanner(argv[1]);
     Grammar *grammar = new Grammar();
-    Parser parser(grammar);
+    Generator *generator = new Generator(argv[1]);
+    Parser parser(grammar, generator);
     while (scanner.HasMoreTokens()) {
         Token* t = scanner.GetNextToken();
         if (t->GetTokenType() == TOKEN_ERROR) {
-            //cout<<"Scanning error: Unidentified token "<<t->GetTokenValue()<<"\n";
+            cout<<"Scanning error: Unidentified token "<<t->GetTokenValue()<<"\n";
             delete t;
-            cout<<"Error\n";
             return 1;
         } 
         parser.AddToken(t);

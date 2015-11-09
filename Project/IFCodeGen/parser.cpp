@@ -10,8 +10,9 @@
 
 using namespace::std;
 
-Parser::Parser(Grammar *new_grammar) {
+Parser::Parser(Grammar *new_grammar, Generator *new_generator) {
     grammar = new_grammar;
+    generator = new_generator;
     num_variables = 0;
     num_functions = 0;
     num_statements = 0;
@@ -68,6 +69,10 @@ bool Parser::Parse() {
         return grammar->Program();
     }
     return true;
+}
+
+void Parser::Emit(string code_line) {
+    generator->Emit(code_line);
 }
 
 int Parser::GetNumVariables() {
