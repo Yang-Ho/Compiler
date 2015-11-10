@@ -3,21 +3,25 @@
  */
 #include "parser.h"
 #include "token.h"
-#include "grammar.h"
+#include "symbol.h"
+#include "ASTnode.h"
 
 #include <vector>
 #include <iostream>
 
 using namespace::std;
 
-Parser::Parser(Grammar *new_grammar, Generator *new_generator) {
+Parser::Parser(Grammar *new_grammar, string fileName) {
     grammar = new_grammar;
-    generator = new_generator;
     num_variables = 0;
     num_functions = 0;
     num_statements = 0;
     tokens = new vector<Token *>();
     grammar->LoadParser(this);
+
+    output_file = fileName.substr(0, fileName.rfind('.'));
+    output_file += "_gen.c";
+    output.open(output_file.c_str());
 }
 
 Parser::~Parser() {
@@ -25,12 +29,17 @@ Parser::~Parser() {
         delete *it;
     }
     delete tokens;
+
+    output.close();
 }
 
 Token* Parser::Consume(TokenType t_type) {
     //cout<<"Consuming: "<<(*tokenIT)->GetTokenValue()<<"\n";
     ++tokenIT;
     while (tokenIT != tokens->end() && (*tokenIT)->GetTokenType() == TOKEN_META) {
+        if ((*tokenIT)->GetTokenType() == TOKEN_META) {
+            output<<(*tokenIT)->GetTokenValue();
+        }
         ++tokenIT;
     }
 
@@ -63,6 +72,9 @@ void Parser::AddToken(Token *new_token) {
 bool Parser::Parse() {
     tokenIT = tokens->begin();
     while (tokenIT != tokens->end() && (*tokenIT)->GetTokenType() == TOKEN_META) {
+        if ((*tokenIT)->GetTokenType() == TOKEN_META) {
+            output<<(*tokenIT)->GetTokenValue();
+        }
         ++tokenIT;
     }
     if (tokenIT != tokens->end()) {
@@ -71,8 +83,20 @@ bool Parser::Parse() {
     return true;
 }
 
-void Parser::Emit(string code_line) {
-    generator->Emit(code_line);
+void Parser::Emit(ASTNode *node) {
+    switch (node->GetType()) {
+        default:
+            break;
+    }
+}
+
+void Parser::InitializeScope() {
+    symbols.push_back(new SymbolTable());
+}
+
+void Parser::FinalizeScope() {
+    delete symbols.back();
+    symbols.pop_back();
 }
 
 int Parser::GetNumVariables() {
@@ -109,4 +133,8 @@ void Parser::DecNumFunctions() {
 
 void Parser::DecNumStatements() {
     num_statements--;
+}
+
+string Parser::GetOutputFileName() {
+    return output_file;
 }

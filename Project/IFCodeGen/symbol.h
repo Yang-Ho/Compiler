@@ -9,15 +9,14 @@ using namespace::std;
 
 class SymbolTable {
     private:
-        vector<map<string, string> > scopes;
+        int count;
+        map<string, int> symbols;
     public:
         SymbolTable();
         ~SymbolTable();
 
-        string LookUp(string name);
-        void Insert(string name, string record);
-        void InitizializeScope();
-        void FinalizeScope();
+        int LookUp(string name);
+        void Insert(string name);
 };
 
 #endif /* SYMBOL_H */

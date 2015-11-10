@@ -17,7 +17,7 @@ void Grammar::LoadParser(Parser *newparser) {
  * <program> --> <typename> ID <program prime> | empty
 */
 bool Grammar::Program() {
-    //cout<<"Program, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Program, "<<parser->GetCurrTokenValue()<<endl;
     if (Type_Name()) {
         if (parser->GetCurrTokenType() == TOKEN_ID) {
             parser->Consume(TOKEN_ID);
@@ -34,7 +34,7 @@ bool Grammar::Program() {
  * <program prime> --> <data decls prime> | <func list prime>
 */
 bool Grammar::Program_Prime() {
-    //cout<<"Program Prime, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Program Prime, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "," || parser->GetCurrTokenValue() == "[" || parser->GetCurrTokenValue() == ";") {
         if (Data_Decls_Prime()) {
             return true;
@@ -51,7 +51,7 @@ bool Grammar::Program_Prime() {
  * Production:	<func list prime> --> <func decl prime> <func tail> <func list>
  */
 bool Grammar::Func_List_Prime() {
-    //cout<<"Func List Prime, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Func List Prime, "<<parser->GetCurrTokenValue()<<endl;
     if (Func_Decl_Prime()) {
         if (Func_Tail()) {
             if (Func_List()) {
@@ -66,7 +66,7 @@ bool Grammar::Func_List_Prime() {
 * Production:	<data decls prime> -> <id tail> <id list prime> semicolon <data decls prime tail> | empty
 */
 bool Grammar::Data_Decls_Prime() {
-    //cout<<"Data Decls Prime, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Data Decls Prime, "<<parser->GetCurrTokenValue()<<endl;
     if (Id_Tail()) {
         parser->IncNumVariables();
         if (Id_List_Prime()) {
@@ -87,7 +87,7 @@ bool Grammar::Data_Decls_Prime() {
 * Production:	<data decls prime tail> --> <typename> ID <dataFuncDecl> | empty
 */
 bool Grammar::Data_Decls_Prime_Tail() {
-    //cout<<"Data Decls Tail, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Data Decls Tail, "<<parser->GetCurrTokenValue()<<endl;
     if (Type_Name()) {
         if (parser->GetCurrTokenType() == TOKEN_ID) {
             parser->Consume(TOKEN_ID);
@@ -105,7 +105,7 @@ bool Grammar::Data_Decls_Prime_Tail() {
 * Production:	<dataFuncDecl> --> <data decls prime> | <func list prime>
 */
 bool Grammar::Data_Func_Decl() {
-    //cout<<"Data Func Decl, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Data Func Decl, "<<parser->GetCurrTokenValue()<<endl;
     if (Data_Decls_Prime()) {
         return true;
     } else if (Func_List_Prime()) {
@@ -119,7 +119,7 @@ bool Grammar::Data_Func_Decl() {
  *								| empty
  */
 bool Grammar::Func_List() {
-    //cout<<"Func_List, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Func_List, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "int" || 
             parser->GetCurrTokenValue() == "void" ||
             parser->GetCurrTokenValue() == "binary" ||
@@ -134,7 +134,7 @@ bool Grammar::Func_List() {
  * Production:	<func> --> <func decl> <func tail>
 */
 bool Grammar::Func() {
-    //cout<<"Func, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Func, "<<parser->GetCurrTokenValue()<<endl;
     if (Func_Decl()) {
         if (Func_Tail()) {
             return true;
@@ -148,15 +148,15 @@ bool Grammar::Func() {
  *								| left_brace <data decls> <statements> right_brace 
  */
 bool Grammar::Func_Tail() {
-    //cout<<"Func Tail, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == ";") {
+    //cout<<"Func Tail, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == ";") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "{") {
+    } else if (parser->GetCurrTokenValue() == "{") {
         parser->Consume(TOKEN_SYMBOL);
         if (Data_Decls()) {
             if (Statements()) {
-                if (parser->GetCurrToken()->GetTokenValue() == "}") {
+                if (parser->GetCurrTokenValue() == "}") {
                     parser->Consume(TOKEN_SYMBOL);
                     parser->IncNumFunctions();
                     return true;
@@ -171,10 +171,10 @@ bool Grammar::Func_Tail() {
  * Production:	<func decl> --> <typename> ID <func decl prime>
  */
 bool Grammar::Func_Decl() {
-    //cout<<"Func_Decl, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Func_Decl, "<<parser->GetCurrTokenValue()<<endl;
     if (Type_Name()) {
-        ////cout<<"Func_Decl, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-        if (parser->GetCurrToken()->GetTokenType() == TOKEN_ID) {
+        ////cout<<"Func_Decl, "<<parser->GetCurrTokenValue()<<endl;
+        if (parser->GetCurrTokenType() == TOKEN_ID) {
             parser->Consume(TOKEN_ID);
             if (Func_Decl_Prime()) {
                 return true;
@@ -188,11 +188,11 @@ bool Grammar::Func_Decl() {
  * Production:	<func decl prime> --> left_parenthesis <parameter list> right_parenthesis 
  */
 bool Grammar::Func_Decl_Prime() {
-    //cout<<"Func_Decl prime, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "(") {
+    //cout<<"Func_Decl prime, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "(") {
         parser->Consume(TOKEN_SYMBOL);
         if (Parameter_List()) {
-            if (parser->GetCurrToken()->GetTokenValue() == ")") {
+            if (parser->GetCurrTokenValue() == ")") {
                 parser->Consume(TOKEN_SYMBOL);
                 return true;
             }
@@ -208,17 +208,17 @@ bool Grammar::Func_Decl_Prime() {
 *								| decimal 
 */
 bool Grammar::Type_Name() {
-    //cout<<"Type_Name, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "int") {
+    //cout<<"Type_Name, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "int") {
         parser->Consume(TOKEN_RESERVED);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "void") {
+    } else if (parser->GetCurrTokenValue() == "void") {
         parser->Consume(TOKEN_RESERVED);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "binary") {
+    } else if (parser->GetCurrTokenValue() == "binary") {
         parser->Consume(TOKEN_RESERVED);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "decimal") {
+    } else if (parser->GetCurrTokenValue() == "decimal") {
         parser->Consume(TOKEN_RESERVED);
         return true;
     }
@@ -231,14 +231,14 @@ bool Grammar::Type_Name() {
 *									| decimal
 */
 bool Grammar::Type_Name_Prime() {
-    //cout<<"Type_Name, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "int") {
+    //cout<<"Type_Name, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "int") {
         parser->Consume(TOKEN_RESERVED);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "binary") {
+    } else if (parser->GetCurrTokenValue() == "binary") {
         parser->Consume(TOKEN_RESERVED);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "decimal") {
+    } else if (parser->GetCurrTokenValue() == "decimal") {
         parser->Consume(TOKEN_RESERVED);
         return true;
     }
@@ -251,14 +251,14 @@ bool Grammar::Type_Name_Prime() {
 *									| empty
 */
 bool Grammar::Parameter_List() {
-    //cout<<"Parameter_List, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "void") {
+    //cout<<"Parameter_List, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "void") {
         parser->Consume(TOKEN_RESERVED);
         if (Parameter_List_Tail()) {
             return true;
         }
     } else if (Type_Name_Prime()) {
-        if (parser->GetCurrToken()->GetTokenType() == TOKEN_ID) {
+        if (parser->GetCurrTokenType() == TOKEN_ID) {
             parser->Consume(TOKEN_ID);
             if (Non_Empty_List_Prime()) {
                 return true;
@@ -275,8 +275,8 @@ bool Grammar::Parameter_List() {
 *											| empty
 */
 bool Grammar::Parameter_List_Tail() {
-    //cout<<"Parameter_List tail, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenType() == TOKEN_ID) {
+    //cout<<"Parameter_List tail, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenType() == TOKEN_ID) {
         parser->Consume(TOKEN_ID);
         if (Non_Empty_List_Prime()) {
             return true;
@@ -291,9 +291,9 @@ bool Grammar::Parameter_List_Tail() {
 * Production:	<non-empty list> --> <type name> ID <non-empty list prime>
 */
 bool Grammar::Non_Empty_List() {
-    //cout<<"Non_Empty_List, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Non_Empty_List, "<<parser->GetCurrTokenValue()<<endl;
     if (Type_Name()) {
-        if (parser->GetCurrToken()->GetTokenType() == TOKEN_ID) {
+        if (parser->GetCurrTokenType() == TOKEN_ID) {
             parser->Consume(TOKEN_ID);
             if (Non_Empty_List_Prime()) {
                 return true;
@@ -308,11 +308,11 @@ bool Grammar::Non_Empty_List() {
 *  											| empty
 */
 bool Grammar::Non_Empty_List_Prime() {
-    //cout<<"Non_Empty_List_Prime, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == ",") {
+    //cout<<"Non_Empty_List_Prime, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == ",") {
         parser->Consume(TOKEN_SYMBOL);
         if (Type_Name()) {
-            if (parser->GetCurrToken()->GetTokenType() == TOKEN_ID) {
+            if (parser->GetCurrTokenType() == TOKEN_ID) {
                 parser->Consume(TOKEN_ID);
                 if (Non_Empty_List_Prime()) {
                     return true;
@@ -330,10 +330,10 @@ bool Grammar::Non_Empty_List_Prime() {
 *								| <type name> <id list> semicolon <data decls>
 */
 bool Grammar::Data_Decls() {
-    //cout<<"Data_Decls, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Data_Decls, "<<parser->GetCurrTokenValue()<<endl;
     if (Type_Name()) {
         if (Id_List()) {
-            if (parser->GetCurrToken()->GetTokenValue() == ";") {
+            if (parser->GetCurrTokenValue() == ";") {
                 parser->Consume(TOKEN_SYMBOL);
                 if (Data_Decls()) {
                     return true;
@@ -350,7 +350,7 @@ bool Grammar::Data_Decls() {
 * Production:	<id list> --> <id> <id list prime>
 */
 bool Grammar::Id_List() {
-    //cout<<"Id_List, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Id_List, "<<parser->GetCurrTokenValue()<<endl;
     if (Id()) {
         if (Id_List_Prime()) {
             return true;
@@ -364,8 +364,8 @@ bool Grammar::Id_List() {
 *									| empty
 */
 bool Grammar::Id_List_Prime() {
-    //cout<<"Id_List_Prime, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == ",") {
+    //cout<<"Id_List_Prime, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == ",") {
         parser->Consume(TOKEN_SYMBOL);
         if (Id_List()) {
             return true;
@@ -380,8 +380,8 @@ bool Grammar::Id_List_Prime() {
 * Production:	<id> --> ID <id tail>
 */
 bool Grammar::Id() {
-    //cout<<"Id, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenType() == TOKEN_ID) {
+    //cout<<"Id, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenType() == TOKEN_ID) {
         parser->Consume(TOKEN_ID);
         if (Id_Tail()) {
             parser->IncNumVariables();
@@ -396,11 +396,11 @@ bool Grammar::Id() {
 *								| empty
 */
 bool Grammar::Id_Tail() {
-    //cout<<"Id Tail, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "[") {
+    //cout<<"Id Tail, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "[") {
         parser->Consume(TOKEN_SYMBOL);
         if (Expression()) {
-            if (parser->GetCurrToken()->GetTokenValue() == "]") {
+            if (parser->GetCurrTokenValue() == "]") {
                 parser->Consume(TOKEN_SYMBOL);
                 return true;
             }
@@ -415,12 +415,12 @@ bool Grammar::Id_Tail() {
 * Production:	<block statements> --> left_brace <statements> right_brace 
 */
 bool Grammar::Block_Statements() {
-    //cout<<"Block_Statements, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "{") {
+    //cout<<"Block_Statements, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "{") {
         parser->Consume(TOKEN_SYMBOL);
         if (Statements()) {
             //cout<<"In block statements\n";
-            if (parser->GetCurrToken()->GetTokenValue() == "}") {
+            if (parser->GetCurrTokenValue() == "}") {
                 parser->Consume(TOKEN_SYMBOL);
                 return true;
             }
@@ -434,7 +434,7 @@ bool Grammar::Block_Statements() {
 *								| empty
 */
 bool Grammar::Statements() {
-    //cout<<"Statements, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Statements, "<<parser->GetCurrTokenValue()<<endl;
     if (Statement()) {
         parser->IncNumStatements();
         //cout<<"Back in statements from statement"<<endl;
@@ -459,8 +459,8 @@ bool Grammar::Statements() {
 *								| print left_parenthesis  STRING right_parenthesis semicolon 
 */
 bool Grammar::Statement() {
-    //cout<<"Statement, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenType() == TOKEN_ID) {
+    //cout<<"Statement, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenType() == TOKEN_ID) {
         parser->Consume(TOKEN_ID);
         if (Statement_Tail()) {
             return true;
@@ -475,47 +475,47 @@ bool Grammar::Statement() {
         return true;
     } else if (Continue_Statement()) {
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "read") {
+    } else if (parser->GetCurrTokenValue() == "read") {
         //cout<<"read\n";
         parser->Consume(TOKEN_RESERVED);
-        if (parser->GetCurrToken()->GetTokenValue() == "(") {
+        if (parser->GetCurrTokenValue() == "(") {
             parser->Consume(TOKEN_SYMBOL);
-            if (parser->GetCurrToken()->GetTokenType() == TOKEN_ID) {
+            if (parser->GetCurrTokenType() == TOKEN_ID) {
                 parser->Consume(TOKEN_ID);
-                if (parser->GetCurrToken()->GetTokenValue() == ")") {
+                if (parser->GetCurrTokenValue() == ")") {
                     parser->Consume(TOKEN_SYMBOL);
-                    if (parser->GetCurrToken()->GetTokenValue() == ";") {
+                    if (parser->GetCurrTokenValue() == ";") {
                         parser->Consume(TOKEN_SYMBOL);
                         return true;
                     }
                 }
             }
         }
-    } else if (parser->GetCurrToken()->GetTokenValue() == "write") {
+    } else if (parser->GetCurrTokenValue() == "write") {
         //cout<<"write\n";
         parser->Consume(TOKEN_RESERVED);
-        if (parser->GetCurrToken()->GetTokenValue() == "(") {
+        if (parser->GetCurrTokenValue() == "(") {
             parser->Consume(TOKEN_SYMBOL);
             if (Expression()) {
-                if (parser->GetCurrToken()->GetTokenValue() == ")") {
+                if (parser->GetCurrTokenValue() == ")") {
                     parser->Consume(TOKEN_SYMBOL);
-                    if (parser->GetCurrToken()->GetTokenValue() == ";") {
+                    if (parser->GetCurrTokenValue() == ";") {
                         parser->Consume(TOKEN_SYMBOL);
                         return true;
                     }
                 }
             }
         }
-    } else if (parser->GetCurrToken()->GetTokenValue() == "print") {
+    } else if (parser->GetCurrTokenValue() == "print") {
         //cout<<"print\n";
         parser->Consume(TOKEN_RESERVED);
-        if (parser->GetCurrToken()->GetTokenValue() == "(") {
+        if (parser->GetCurrTokenValue() == "(") {
             parser->Consume(TOKEN_SYMBOL);
-            if (parser->GetCurrToken()->GetTokenType() == TOKEN_STRING) {
+            if (parser->GetCurrTokenType() == TOKEN_STRING) {
                 parser->Consume(TOKEN_STRING);
-                if (parser->GetCurrToken()->GetTokenValue() == ")") {
+                if (parser->GetCurrTokenValue() == ")") {
                     parser->Consume(TOKEN_SYMBOL);
-                    if (parser->GetCurrToken()->GetTokenValue() == ";") {
+                    if (parser->GetCurrTokenValue() == ";") {
                         parser->Consume(TOKEN_SYMBOL);
                         return true;
                     }
@@ -531,7 +531,7 @@ bool Grammar::Statement() {
 *									| <func call tail>
 */
 bool Grammar::Statement_Tail() {
-    //cout<<"Statement tail, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Statement tail, "<<parser->GetCurrTokenValue()<<endl;
     if (Assignment_Tail()) {
         return true;
     } else if (Func_Call_Tail()) {
@@ -544,12 +544,12 @@ bool Grammar::Statement_Tail() {
 * Production:	<assignment tail> --> <id tail> equal_sign <expression> semicolon 
 */
 bool Grammar::Assignment_Tail() {
-    //cout<<"assignment tail, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"assignment tail, "<<parser->GetCurrTokenValue()<<endl;
     if (Id_Tail()) {
-        if (parser->GetCurrToken()->GetTokenValue() == "=") {
+        if (parser->GetCurrTokenValue() == "=") {
             parser->Consume(TOKEN_SYMBOL);
             if (Expression()) {
-                if (parser->GetCurrToken()->GetTokenValue() == ";") {
+                if (parser->GetCurrTokenValue() == ";") {
                     parser->Consume(TOKEN_SYMBOL);
                     return true;
                 }
@@ -563,13 +563,13 @@ bool Grammar::Assignment_Tail() {
 * Production:	<func call tail> --> left_parenthesis <expr list> right_parenthesis semicolon 
 */
 bool Grammar::Func_Call_Tail() {
-    //cout<<"Func_Call tail, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "(") {
+    //cout<<"Func_Call tail, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "(") {
         parser->Consume(TOKEN_SYMBOL);
         if (Expr_List()) {
-            if (parser->GetCurrToken()->GetTokenValue() == ")") {
+            if (parser->GetCurrTokenValue() == ")") {
                 parser->Consume(TOKEN_SYMBOL);
-                if (parser->GetCurrToken()->GetTokenValue() == ";") {
+                if (parser->GetCurrTokenValue() == ";") {
                     parser->Consume(TOKEN_SYMBOL);
                     return true;
                 }
@@ -584,7 +584,7 @@ bool Grammar::Func_Call_Tail() {
 *  								| empty
 */
 bool Grammar::Expr_List() {
-    //cout<<"Expr_List, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Expr_List, "<<parser->GetCurrTokenValue()<<endl;
     if (Non_Empty_Expr_List()) {
         return true;
     } else {
@@ -597,7 +597,7 @@ bool Grammar::Expr_List() {
 * Production:	<non-empty expr list> --> <expression> <non-empty expr list prime> 
 */
 bool Grammar::Non_Empty_Expr_List() {
-    //cout<<"Non_Empty_Expr_List, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Non_Empty_Expr_List, "<<parser->GetCurrTokenValue()<<endl;
     if (Expression()) {
         if (Non_Empty_Expr_List_Prime()) {
             return true;
@@ -611,8 +611,8 @@ bool Grammar::Non_Empty_Expr_List() {
 *												| empty
 */
 bool Grammar::Non_Empty_Expr_List_Prime() {
-    //cout<<"Non_Empty_Expr_List_Prime, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == ",") {
+    //cout<<"Non_Empty_Expr_List_Prime, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == ",") {
         parser->Consume(TOKEN_SYMBOL);
         if (Expression()) {
             if (Non_Empty_Expr_List_Prime()) {
@@ -629,13 +629,13 @@ bool Grammar::Non_Empty_Expr_List_Prime() {
 * Production:	<if statement> --> if left_parenthesis <condition expression> right_parenthesis <block statements> 
 */
 bool Grammar::If_Statement() {
-    //cout<<"If_Statement, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "if") {
+    //cout<<"If_Statement, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "if") {
         parser->Consume(TOKEN_RESERVED);
-        if (parser->GetCurrToken()->GetTokenValue() == "(") {
+        if (parser->GetCurrTokenValue() == "(") {
             parser->Consume(TOKEN_SYMBOL);
             if (Condition_Expression()) {
-                if (parser->GetCurrToken()->GetTokenValue() == ")") {
+                if (parser->GetCurrTokenValue() == ")") {
                     parser->Consume(TOKEN_SYMBOL);
                     if (Block_Statements()) {
                         return true;
@@ -651,7 +651,7 @@ bool Grammar::If_Statement() {
 * Production:	<condition expression> -->  <condition> <condition expression tail>
 */
 bool Grammar::Condition_Expression() {
-    //cout<<"Condition_Expression, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Condition_Expression, "<<parser->GetCurrTokenValue()<<endl;
     if (Condition()) {
         if (Condition_Expression_Tail()) {
             return true;
@@ -665,7 +665,7 @@ bool Grammar::Condition_Expression() {
 *												| empty
 */
 bool Grammar::Condition_Expression_Tail() {
-    //cout<<"Condition_Expression tail, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Condition_Expression tail, "<<parser->GetCurrTokenValue()<<endl;
     if (Condition_Op()) {
         if (Condition()) {
             return true;
@@ -681,11 +681,11 @@ bool Grammar::Condition_Expression_Tail() {
 *								| double_or_sign
 */
 bool Grammar::Condition_Op() {
-    //cout<<"Condition_Op, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "&&") {
+    //cout<<"Condition_Op, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "&&") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "||") {
+    } else if (parser->GetCurrTokenValue() == "||") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
     }
@@ -696,7 +696,7 @@ bool Grammar::Condition_Op() {
 * Production:	<condition> --> <expression> <comparison op> <expression> 
 */
 bool Grammar::Condition() {
-    //cout<<"Condition, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Condition, "<<parser->GetCurrTokenValue()<<endl;
     if (Expression()) {
         if (Comparison_Op()) {
             if (Expression()) {
@@ -716,23 +716,23 @@ bool Grammar::Condition() {
 *									| <=
 */
 bool Grammar::Comparison_Op() {
-    //cout<<"Comparison_Op, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "==") {
+    //cout<<"Comparison_Op, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "==") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "!=") {
+    } else if (parser->GetCurrTokenValue() == "!=") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == ">") {
+    } else if (parser->GetCurrTokenValue() == ">") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == ">=") {
+    } else if (parser->GetCurrTokenValue() == ">=") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "<") {
+    } else if (parser->GetCurrTokenValue() == "<") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "<=") {
+    } else if (parser->GetCurrTokenValue() == "<=") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
     }
@@ -743,13 +743,13 @@ bool Grammar::Comparison_Op() {
 * Production:	<while statement> --> while left_parenthesis <condition expression> right_parenthesis <block statements> 
 */
 bool Grammar::While_Statement() {
-    //cout<<"While_Statement, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "while") {
+    //cout<<"While_Statement, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "while") {
         parser->Consume(TOKEN_RESERVED);
-        if (parser->GetCurrToken()->GetTokenValue() == "(") {
+        if (parser->GetCurrTokenValue() == "(") {
             parser->Consume(TOKEN_SYMBOL);
             if (Condition_Expression()) {
-                if (parser->GetCurrToken()->GetTokenValue() == ")") {
+                if (parser->GetCurrTokenValue() == ")") {
                     parser->Consume(TOKEN_SYMBOL);
                     if (Block_Statements()) {
                         return true;
@@ -765,8 +765,8 @@ bool Grammar::While_Statement() {
 * Production:	<return statement> --> return <return statement prime>
 */
 bool Grammar::Return_Statement() {
-    //cout<<"Return_Statement, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "return") {
+    //cout<<"Return_Statement, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "return") {
         parser->Consume(TOKEN_RESERVED);
         if (Return_Statement_Tail()) {
             return true;
@@ -780,13 +780,13 @@ bool Grammar::Return_Statement() {
 *											| semicolon 
 */
 bool Grammar::Return_Statement_Tail() {
-    //cout<<"Return_Statement tail, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Return_Statement tail, "<<parser->GetCurrTokenValue()<<endl;
     if (Expression()) {
-        if (parser->GetCurrToken()->GetTokenValue() == ";") {
+        if (parser->GetCurrTokenValue() == ";") {
             parser->Consume(TOKEN_SYMBOL);
             return true;
         }
-    } else if (parser->GetCurrToken()->GetTokenValue() == ";") {
+    } else if (parser->GetCurrTokenValue() == ";") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
     }
@@ -797,10 +797,10 @@ bool Grammar::Return_Statement_Tail() {
 * Production:	<break statement> ---> break semicolon 
 */
 bool Grammar::Break_Statement() {
-    //cout<<"Break_Statement, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "break") {
+    //cout<<"Break_Statement, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "break") {
         parser->Consume(TOKEN_RESERVED);
-        if (parser->GetCurrToken()->GetTokenValue() == ";") {
+        if (parser->GetCurrTokenValue() == ";") {
             parser->Consume(TOKEN_SYMBOL);
             return true;
         }
@@ -812,10 +812,10 @@ bool Grammar::Break_Statement() {
 * Production:	<continue statement> ---> continue semicolon
 */
 bool Grammar::Continue_Statement() {
-    //cout<<"Continue_Statement, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "continue") {
+    //cout<<"Continue_Statement, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "continue") {
         parser->Consume(TOKEN_RESERVED);
-        if (parser->GetCurrToken()->GetTokenValue() == ";") {
+        if (parser->GetCurrTokenValue() == ";") {
             parser->Consume(TOKEN_SYMBOL);
             return true;
         }
@@ -827,7 +827,7 @@ bool Grammar::Continue_Statement() {
 * Production:	<expression> --> <term> <expression prime> 
 */
 bool Grammar::Expression() {
-    //cout<<"Expression, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Expression, "<<parser->GetCurrTokenValue()<<endl;
     if (Term()) {
         if (Expression_Prime()) {
             return true;
@@ -841,7 +841,7 @@ bool Grammar::Expression() {
 *				| empty
 */
 bool Grammar::Expression_Prime() {
-    //cout<<"Expression_Prime, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Expression_Prime, "<<parser->GetCurrTokenValue()<<endl;
     if (Addop()) {
         if (Term()) {
             if (Expression_Prime()) {
@@ -859,11 +859,11 @@ bool Grammar::Expression_Prime() {
 *							| minus_sign 
 */
 bool Grammar::Addop() {
-    //cout<<"Addop, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "+") {
+    //cout<<"Addop, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "+") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "-") {
+    } else if (parser->GetCurrTokenValue() == "-") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
     }
@@ -874,7 +874,7 @@ bool Grammar::Addop() {
 * Production:	<term> --> <factor> <term prime> 
 */
 bool Grammar::Term() {
-    //cout<<"Term, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Term, "<<parser->GetCurrTokenValue()<<endl;
     if (Factor()) {
         if (Term_Prime()) {
             return true;
@@ -888,7 +888,7 @@ bool Grammar::Term() {
 *                               | empty
 */
 bool Grammar::Term_Prime() {
-    //cout<<"Term_Prime, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
+    //cout<<"Term_Prime, "<<parser->GetCurrTokenValue()<<endl;
     if (Mulop()) {
         if (Factor()) {
             if (Term_Prime()) { 
@@ -906,11 +906,11 @@ bool Grammar::Term_Prime() {
 *							| forward_slash
 */
 bool Grammar::Mulop() {
-    //cout<<"Mulop, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "*") {
+    //cout<<"Mulop, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "*") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "/") {
+    } else if (parser->GetCurrTokenValue() == "/") {
         parser->Consume(TOKEN_SYMBOL);
         return true;
     }
@@ -924,25 +924,25 @@ bool Grammar::Mulop() {
 *							| left_parenthesis <expression> right_parenthesis
 */
 bool Grammar::Factor() {
-    //cout<<"Factor, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenType() == TOKEN_ID) {
+    //cout<<"Factor, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenType() == TOKEN_ID) {
         parser->Consume(TOKEN_ID);
         if (Factor_Tail()) {
             return true;
         }
-    } else if (parser->GetCurrToken()->GetTokenType() == TOKEN_NUMBER) {
+    } else if (parser->GetCurrTokenType() == TOKEN_NUMBER) {
         parser->Consume(TOKEN_NUMBER);
         return true;
-    } else if (parser->GetCurrToken()->GetTokenValue() == "-") {
+    } else if (parser->GetCurrTokenValue() == "-") {
         parser->Consume(TOKEN_SYMBOL);
-        if (parser->GetCurrToken()->GetTokenType() == TOKEN_NUMBER) {
+        if (parser->GetCurrTokenType() == TOKEN_NUMBER) {
             parser->Consume(TOKEN_NUMBER);
             return true;
         }
-    } else if (parser->GetCurrToken()->GetTokenValue() == "(") {
+    } else if (parser->GetCurrTokenValue() == "(") {
         parser->Consume(TOKEN_SYMBOL);
         if (Expression()) {
-            if (parser->GetCurrToken()->GetTokenValue() == ")") {
+            if (parser->GetCurrTokenValue() == ")") {
                 parser->Consume(TOKEN_SYMBOL);
                 return true;
             }
@@ -957,19 +957,19 @@ bool Grammar::Factor() {
 *									| empty
 */
 bool Grammar::Factor_Tail() {
-    //cout<<"Factor tail, "<<parser->GetCurrToken()->GetTokenValue()<<endl;
-    if (parser->GetCurrToken()->GetTokenValue() == "[") {
+    //cout<<"Factor tail, "<<parser->GetCurrTokenValue()<<endl;
+    if (parser->GetCurrTokenValue() == "[") {
         parser->Consume(TOKEN_SYMBOL);
         if (Expression()) {
-            if (parser->GetCurrToken()->GetTokenValue() == "]") {
+            if (parser->GetCurrTokenValue() == "]") {
                 parser->Consume(TOKEN_SYMBOL);
                 return true;
             }
         }
-    } else if (parser->GetCurrToken()->GetTokenValue() == "(") {
+    } else if (parser->GetCurrTokenValue() == "(") {
         parser->Consume(TOKEN_SYMBOL);
         if (Expr_List()) {
-            if (parser->GetCurrToken()->GetTokenValue() == ")") {
+            if (parser->GetCurrTokenValue() == ")") {
                 parser->Consume(TOKEN_SYMBOL);
                 return true;
             }

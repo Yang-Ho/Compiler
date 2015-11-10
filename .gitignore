@@ -1,5 +1,7 @@
 *.tar
 *.swp
+filenames.txt
 
-Scanner/tests/gen/*
-Scanner/tests/outputs/*
+Project/Scanner/*
+Project/Parser/*
+Project/tests/*

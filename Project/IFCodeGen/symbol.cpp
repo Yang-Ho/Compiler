@@ -7,30 +7,22 @@
 using namespace::std;
 
 SymbolTable::SymbolTable() {
-    scopes = vector<map<string, string> >();
-    scopes.push_back(map<string, string>());
+    symbols = map<string, int>();
+    count = 0;
 }
 
 SymbolTable::~SymbolTable() {
     //delete scopes;
 }
 
-void SymbolTable::Insert(string name, string record) {
-    scopes.back()[name] = record;
+void SymbolTable::Insert(string name) {
+    symbols[name] = count++;
 }
 
-string SymbolTable::LookUp(string name) {
-    if (scopes.back().find(name) != scopes.back().end()) {
-        return scopes.back()[name];
+int SymbolTable::LookUp(string name) {
+    if (symbols.find(name) != symbols.end()) {
+        return symbols[name];
     } else {
-        return NULL;
+        return -1;
     }
-}
-
-void SymbolTable::InitizializeScope() {
-    scopes.push_back(map<string, string>());
-}
-
-void SymbolTable::FinalizeScope() {
-    scopes.pop_back();
 }

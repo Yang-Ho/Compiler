@@ -3,9 +3,11 @@
 
 #include "token.h"
 #include "grammar.h"
-#include "generator.h"
+#include "symbol.h"
+#include "ASTnode.h"
 
 #include <vector>
+#include <fstream>
 
 using namespace::std;
 
@@ -14,30 +16,40 @@ class Generator;
 
 class Parser {
     private:
-        vector<Token *> *tokens;
-        vector<Token *>::iterator tokenIT;
+        vector<Token *> *tokens;            // Scanned tokens
+        vector<Token *>::iterator tokenIT;  // The current token
+        
+        Grammar* grammar;                   // The grammar used
+
+        string output_file;                 // Output file name
+        ofstream output;                    // The output file stream
+
+        vector<SymbolTable *> symbols;      // Symbol table
 
         int num_variables;
         int num_functions;
         int num_statements;
-
-        Grammar* grammar;
-        Generator* generator;
     public:
-        Parser(Grammar *new_grammar, Generator* new_generator);
+        // Constructor and deconstructor
+        Parser(Grammar *new_grammar, string fileName);
         ~Parser();
 
+        // Token related
         Token* Consume(TokenType t_type);
         Token* GetCurrToken();
         string GetCurrTokenValue();
         int GetCurrTokenType();
-
         void AddToken(Token *new_token);
 
+        // Parsing related 
         bool Parse();
 
-        void Emit(string code_line);
+        // Code generation related
+        void Emit(ASTNode *node);
+        void InitializeScope();
+        void FinalizeScope();
 
+        // Project 2 legacy code
         int GetNumVariables();
         int GetNumFunctions();
         int GetNumStatements();
@@ -47,6 +59,9 @@ class Parser {
         void DecNumVariables();
         void DecNumFunctions();
         void DecNumStatements();
+
+        // Output related
+        string GetOutputFileName();
 };
 
 #endif /* PARSER_H */

@@ -7,23 +7,29 @@ using namespace::std;
 
 int ASTNode::label_count = 0;
 
-ASTNode::ASTNode() {
-    attributes = map<string, int>();
+ASTNode::ASTNode(ASTNodeType t, string value) {
+    type = t;
+    left = NULL;
+    right = NULL;
+    value = "";
+}
+
+ASTNode::ASTNode(ASTNodeType t, ASTNode* l, ASTNode* r) {
+    type = t;
+    left = l;
+    right = r;
+    value = "";
 }
 
 ASTNode::~ASTNode() {
+    delete left;
+    delete right;
 }
 
-void ASTNode::UpdateAttribute(string attribute, int value) {
-    attributes[attribute] = value;
+string ASTNode::GetValue() {
+    return value;
 }
 
-void ASTNode::UpdateAttribute(string attribute) {
-    if (attribute == "label") {
-        attributes[attribute] = ++label_count;
-    }
-}
-
-int ASTNode::GetAttribute(string attribute) {
-    return attributes[attribute];
+ASTNodeType ASTNode::GetType() {
+    return type;
 }

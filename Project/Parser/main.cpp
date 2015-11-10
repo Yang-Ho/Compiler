@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
             if (tokens[tIndex].value == tokens.back().value) {
                 cout<<"Pass variable "<<num_variables<<" functions "<<num_functions<<" statement "<<num_statements<<endl;
             } else {
-                cout<<"Failed to parse: "<<tokens[tIndex].value<<"\n";
+                cout<<"Failed to parse: "<<tokens[tIndex+1].value<<"\n";
             }
         } else {
             cout<<"Failed to parse\n";

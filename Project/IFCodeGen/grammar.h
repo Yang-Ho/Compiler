@@ -1,6 +1,8 @@
 #ifndef GRAMMAR_H
 #define GRAMMAR_H 
 #include "parser.h"
+#include "ASTnode.h"
+#include "symbol.h"
 
 using namespace::std;
 
@@ -8,10 +10,12 @@ class Parser;
 
 class Grammar {
     private:
-        Parser *parser;
+        Parser *parser;                     // The parser object
     public:
+        // Loads parser
         void LoadParser(Parser *newparser);
 
+        // Grammar productions
         bool Program();
 
         bool Program_Prime();
