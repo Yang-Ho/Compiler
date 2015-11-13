@@ -1,0 +1,98 @@
+<program> --> <typename> ID <program prime> 
+| empty
+<program prime> --> <data decls prime>
+| <func list prime>
+<func list prime> --> <func decl prime> <func tail> <func list>
+<data decls prime> --> <id tail> <id list prime> semicolon <data decls prime tail> 
+| empty
+<data decls prime tail> --> <typename> ID <data Func Decl> 
+| empty
+<dataFuncDecl> --> <data decls prime> 
+| <func list prime>
+<func list> --> <func> <func list>
+| empty
+<func> --> <func decl> <func tail>
+<func tail> -->semicolon 
+| left_brace <data decls> <statements> right_brace 
+<func decl> --> <typename> ID <func decl prime>
+<func decl prime> --> left_parenthesis <parameter list> right_parenthesis 
+<type name> --> int 
+| void 
+| binary 
+| decimal 
+<type name prime> --> int
+| binary
+| decimal
+<parameter list> --> void <parameter list tail>
+| <typename prime> ID <non-empty list prime> 
+| empty
+<parameter list tail> --> ID <non-empty list prime> 
+| empty
+<non-empty list> --> <type name> ID <non-empty list prime>
+<non-empty list prime> --> comma <type name> ID <non-empty list prime>
+| empty
+<data decls> --> empty 
+| <type name> <id list> semicolon <data decls>
+<id list> --> <id> <id list prime>
+<id list prime> --> comma <id list> 
+| empty
+<id> --> ID <id tail>
+<id tail> --> left_bracket <expression> right_bracket 
+| empty
+<block statements> --> left_brace <statements> right_brace 
+<statements> --> <statement> <statements> 
+| empty
+<statement> --> ID <statement tail> 
+| <if statement> 
+| <while statement> 
+| <return statement> 
+| <break statement> 
+| <continue statement> 
+| read left_parenthesis  ID right_parenthesis semicolon 
+| write left_parenthesis <expression> right_parenthesis semicolon 
+| print left_parenthesis  STRING right_parenthesis semicolon 
+<statement tail> --> <assignment tail> 
+| <func call tail>
+<assignment tail> --> <id tail> equal_sign <expression> semicolon 
+<func call tail> --> left_parenthesis <expr list> right_parenthesis semicolon 
+<expr list> --> <non-empty expr list> 
+| empty
+<non-empty expr list> --> <expression> <non-empty expr list prime> 
+<non-empty expr list prime> --> comma <expression> <non-empty expr list prime>
+| empty
+<if statement> --> if left_parenthesis <condition expression> right_parenthesis <block statements> 
+<condition expression> -->  <condition> <condition expression tail>
+<condition expression tail> -->  <condition op> <condition> 
+| empty
+<condition op> --> double_and_sign 
+| double_or_sign
+<condition> --> <expression> <comparison op> <expression> 
+<comparison op> --> == 
+| != 
+| > 
+| >= 
+| < 
+| <=
+<while statement> --> while left_parenthesis <condition expression> right_parenthesis <block statements> 
+<return statement> --> return <return statement tail>
+<return statement tail> --> <expression> semicolon 
+| semicolon 
+<break statement> --> break semicolon 
+<continue statement> --> continue semicolon
+<expression> --> <term> <expression prime> 
+<expression prime> --> <addop> <term> <expression prime>
+| empty
+<addop> --> plus_sign 
+| minus_sign 
+<term> --> <factor> <term prime> 
+<term prime> --> <mulop> <factor> <term prime>
+| empty
+<mulop> --> star_sign 
+| forward_slash
+<factor> --> ID <factor tail> 
+| NUMBER
+| minus_sign NUMBER 
+| left_parenthesis <expression> right_parenthesis
+<factor tail> --> left_bracket <expression> right_bracket  
+| left_parenthesis <expr list> right_parenthesis 
+| empty 

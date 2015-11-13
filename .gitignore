@@ -1,5 +1,6 @@
 *.tar
 *.swp
+*.exe
 filenames.txt
 
 Project/Scanner/*

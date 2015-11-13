@@ -3,8 +3,8 @@
 
 #include "token.h"
 #include "grammar.h"
-#include "symbol.h"
 #include "ASTnode.h"
+#include "generator.h"
 
 #include <vector>
 #include <fstream>
@@ -20,18 +20,14 @@ class Parser {
         vector<Token *>::iterator tokenIT;  // The current token
         
         Grammar* grammar;                   // The grammar used
-
-        string output_file;                 // Output file name
-        ofstream output;                    // The output file stream
-
-        vector<SymbolTable *> symbols;      // Symbol table
+        Generator* generator;
 
         int num_variables;
         int num_functions;
         int num_statements;
     public:
         // Constructor and deconstructor
-        Parser(Grammar *new_grammar, string fileName);
+        Parser(Grammar *new_grammar, Generator* gen);
         ~Parser();
 
         // Token related
@@ -42,12 +38,8 @@ class Parser {
         void AddToken(Token *new_token);
 
         // Parsing related 
-        bool Parse();
+        ASTNode *Parse();
 
-        // Code generation related
-        void Emit(ASTNode *node);
-        void InitializeScope();
-        void FinalizeScope();
 
         // Project 2 legacy code
         int GetNumVariables();
@@ -59,9 +51,6 @@ class Parser {
         void DecNumVariables();
         void DecNumFunctions();
         void DecNumStatements();
-
-        // Output related
-        string GetOutputFileName();
 };
 
 #endif /* PARSER_H */

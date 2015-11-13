@@ -17,6 +17,11 @@ class SymbolTable {
 
         int LookUp(string name);
         void Insert(string name);
+
+        void OpenScope();
+        void CloseScope();
+
+        int CurrentScope();
 };
 
 #endif /* SYMBOL_H */

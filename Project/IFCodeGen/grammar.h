@@ -16,106 +16,106 @@ class Grammar {
         void LoadParser(Parser *newparser);
 
         // Grammar productions
-        bool Program();
+        ASTNode * Program();
 
-        bool Program_Prime();
+        ASTNode * Program_Prime();
 
-        bool Data_Decls_Prime();
+        ASTNode * Data_Decls_Prime();
 
-        bool Data_Decls_Prime_Tail();
+        ASTNode * Data_Decls_Prime_Tail();
 
-        bool Func_List_Prime();
+        ASTNode * Func_List_Prime();
 
-        bool Func_List();
+        ASTNode * Func_List();
 
-        bool Func();
+        ASTNode * Func();
 
-        bool Func_Tail();
+        ASTNode * Func_Tail();
 
-        bool Func_Decl();
+        ASTNode * Func_Decl();
 
-        bool Func_Decl_Prime();
+        ASTNode * Func_Decl_Prime();
 
-        bool Type_Name();
+        ASTNode * Type_Name();
 
-        bool Type_Name_Prime();
+        ASTNode * Type_Name_Prime();
 
-        bool Parameter_List();
+        ASTNode * Parameter_List();
 
-        bool Parameter_List_Tail();
+        ASTNode * Parameter_List_Tail();
 
-        bool Non_Empty_List();
+        ASTNode * Non_Empty_List();
 
-        bool Non_Empty_List_Prime();
+        ASTNode * Non_Empty_List_Prime();
 
-        bool Data_Decls();
+        ASTNode * Data_Decls();
 
-        bool Data_Func_Decl();
+        ASTNode * Data_Func_Decl();
 
-        bool Id_List();
+        ASTNode * Id_List();
 
-        bool Id_List_Prime();
+        ASTNode * Id_List_Prime();
 
-        bool Id();
+        ASTNode * Id();
 
-        bool Id_Tail();
+        ASTNode * Id_Tail();
 
-        bool Block_Statements();
+        ASTNode * Block_Statements();
 
-        bool Statements();
+        ASTNode * Statements();
 
-        bool Statement();
+        ASTNode * Statement();
 
-        bool Statement_Tail();
+        ASTNode * Statement_Tail();
 
-        bool Assignment();
+        ASTNode * Assignment();
 
-        bool Assignment_Tail();
+        ASTNode * Assignment_Tail();
 
-        bool Func_Call_Tail();
+        ASTNode * Func_Call_Tail();
 
-        bool Expr_List();
+        ASTNode * Expr_List();
 
-        bool Non_Empty_Expr_List();
+        ASTNode * Non_Empty_Expr_List();
 
-        bool Non_Empty_Expr_List_Prime();
+        ASTNode * Non_Empty_Expr_List_Prime();
 
-        bool If_Statement();
+        ASTNode * If_Statement();
 
-        bool Condition_Expression();
+        ASTNode * Condition_Expression();
 
-        bool Condition_Expression_Tail();
+        ASTNode * Condition_Expression_Tail();
                
-        bool Condition_Op();
+        ASTNode * Condition_Op();
 
-        bool Condition();
+        ASTNode * Condition();
 
-        bool Comparison_Op();
+        ASTNode * Comparison_Op();
 
-        bool While_Statement();
+        ASTNode * While_Statement();
 
-        bool Return_Statement();
+        ASTNode * Return_Statement();
         
-        bool Return_Statement_Tail();
+        ASTNode * Return_Statement_Tail();
 
-        bool Break_Statement();
+        ASTNode * Break_Statement();
 
-        bool Continue_Statement();
+        ASTNode * Continue_Statement();
 
-        bool Expression();
+        ASTNode * Expression();
 
-        bool Expression_Prime();
+        ASTNode * Expression_Prime();
 
-        bool Addop();
+        ASTNode * Addop();
 
-        bool Term();
+        ASTNode * Term();
 
-        bool Term_Prime();
+        ASTNode * Term_Prime();
 
-        bool Mulop();
+        ASTNode * Mulop();
 
-        bool Factor();
+        ASTNode * Factor();
 
-        bool Factor_Tail();
+        ASTNode * Factor_Tail();
 };
 #endif /* GRAMMAR_H */

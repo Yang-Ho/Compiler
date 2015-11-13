@@ -24,12 +24,13 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    cout<<"Input file: "<<argv[1]<<"\n";
+    cout<<"Input file: "<<argv[1]<<" ";
     // Initialize scanner and prepare output file
-    
+
     Scanner scanner(argv[1]);
     Grammar *grammar = new Grammar();
-    Parser parser(grammar, argv[1]);
+    Generator *generator = new Generator(argv[1]);
+    Parser parser(grammar, generator);
     while (scanner.HasMoreTokens()) {
         Token* t = scanner.GetNextToken();
         if (t->GetTokenType() == TOKEN_ERROR) {
@@ -39,14 +40,20 @@ int main(int argc, char* argv[]) {
         } 
         parser.AddToken(t);
     }
-    if (parser.Parse()) {
+    ASTNode * ast_tree = parser.Parse();
+    if (ast_tree) {
         //cout<<"Pass variable "<<parser.GetNumVariables()<<" functions "<<parser.GetNumFunctions()<<" statement "<<parser.GetNumStatements()<<endl;
         cout<<"Successfully parsed the program!\n";
-        cout<<"Output file: "<<parser.GetOutputFileName()<<"\n";
+        //cout<<"Output file: "<<parser.GetOutputFileName()<<"\n";
+        cout<<"emitting code\n";
+        generator->Emit(ast_tree);
+        cout<<"Done emitting code\n";
     } else {
         cout<<"Falied to parse\n";
     }
     delete grammar;
+    delete ast_tree;
+    delete generator;
     
     return 0;
 }

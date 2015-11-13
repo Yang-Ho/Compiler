@@ -14,191 +14,273 @@ void Grammar::LoadParser(Parser *newparser) {
 }
 
 /**
- * <program> --> <typename> ID <program prime> | empty
+ * <program> --> <typename> ID <program prime> 
+ *              | empty
+ *
+ *              $$ = ASTNode(PROGRAM, value=ID, left=typename, right=program prime)
+ *              $$ = ASTNode()
 */
-bool Grammar::Program() {
+ASTNode * Grammar::Program() {
     //cout<<"Program, "<<parser->GetCurrTokenValue()<<endl;
-    if (Type_Name()) {
+    ASTNode * type_name = Type_Name();
+    if (type_name) {
         if (parser->GetCurrTokenType() == TOKEN_ID) {
+            string id = parser->GetCurrTokenValue();
             parser->Consume(TOKEN_ID);
-            if (Program_Prime()) {
-                return true;
+            ASTNode * program_prime = Program_Prime();
+            if (program_prime) {
+                return new ASTNode(AST_PROGRAM, id, NULL, type_name, program_prime);
             }
+            delete program_prime;
         }
     } else {
-        return true;
+        return new ASTNode();
     }
-    return false;
+    delete type_name;
+    return NULL;
 }
 /**
- * <program prime> --> <data decls prime> | <func list prime>
+ * <program prime> --> <data decls prime>
+ *                    | <func list prime>
+ *                    
+ *                    $$ = data decls prime
+ *                    $$ = func list prime
 */
-bool Grammar::Program_Prime() {
+ASTNode * Grammar::Program_Prime() {
     //cout<<"Program Prime, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "," || parser->GetCurrTokenValue() == "[" || parser->GetCurrTokenValue() == ";") {
-        if (Data_Decls_Prime()) {
-            return true;
-        }
+        return Data_Decls_Prime();
     } else {
-        if (Func_List_Prime()) {
-            return true;
-        }
+        return Func_List_Prime();
     }
-    return false;
+    return NULL;
 }
 
 /**
  * Production:	<func list prime> --> <func decl prime> <func tail> <func list>
+ *
+ *                                  $$ = ASTNode(FUNC LIST PRIME, child=func tail, left=func decl prime, right= func list)
  */
-bool Grammar::Func_List_Prime() {
+ASTNode * Grammar::Func_List_Prime() {
     //cout<<"Func List Prime, "<<parser->GetCurrTokenValue()<<endl;
-    if (Func_Decl_Prime()) {
-        if (Func_Tail()) {
-            if (Func_List()) {
-                return true;
+    ASTNode * func_decl_prime = Func_Decl_Prime();
+    if (func_decl_prime) {
+        ASTNode * func_tail = Func_Tail();
+        if (func_tail) {
+            ASTNode * func_list = Func_List();
+            if (func_list) {
+                return new ASTNode(AST_FUNC_LIST, "", func_tail, func_decl_prime, func_list);
             }
+            delete func_list;
         }
+        delete func_tail;
     }
-    return false;
+    delete func_decl_prime;
+    return NULL;
 }
 
 /**
-* Production:	<data decls prime> -> <id tail> <id list prime> semicolon <data decls prime tail> | empty
+* Production:	<data decls prime> -> <id tail> <id list prime> semicolon <data decls prime tail> 
+*                                   | empty
+*
+*                                   $$ = ASTNode(DATA DECLS PRIME, child=id tail, child=id list prime, right=data decls prime tail)
+*                                   $$ = ASTNode()
 */
-bool Grammar::Data_Decls_Prime() {
+ASTNode * Grammar::Data_Decls_Prime() {
     //cout<<"Data Decls Prime, "<<parser->GetCurrTokenValue()<<endl;
-    if (Id_Tail()) {
+    ASTNode* id_tail = Id_Tail();
+    if (id_tail) {
         parser->IncNumVariables();
-        if (Id_List_Prime()) {
+        ASTNode * id_list_prime = Id_List_Prime();
+        if (id_list_prime) {
             if (parser->GetCurrTokenValue() == ";") {
                 parser->Consume(TOKEN_SYMBOL);
-                if (Data_Decls_Prime_Tail()) {
-                    return true;
+                ASTNode* data_decls_prime_tail = Data_Decls_Prime_Tail();
+                if (data_decls_prime_tail) {
+                    return new ASTNode(AST_DATA_DECLS_PRIME, "", id_tail, id_list_prime, data_decls_prime_tail);
                 }
+                delete data_decls_prime_tail;
             }
         }
+        delete id_list_prime;
     } else {
-        return true;
+        return new ASTNode();
     }
-    return false;
+    delete id_tail;
+    return NULL;
 }
 
 /**
-* Production:	<data decls prime tail> --> <typename> ID <dataFuncDecl> | empty
+* Production:	<data decls prime tail> --> <typename> ID <data Func Decl> 
+*                                           | empty
+*
+*                                           $$ = ASTNode(DATA DECLS PRIME TAIL, value=ID, left=typename, right=data func decl)
+*                                           $$ = ASTNode()
 */
-bool Grammar::Data_Decls_Prime_Tail() {
+ASTNode * Grammar::Data_Decls_Prime_Tail() {
     //cout<<"Data Decls Tail, "<<parser->GetCurrTokenValue()<<endl;
-    if (Type_Name()) {
+    ASTNode * type_name = Type_Name();
+    if (type_name) {
         if (parser->GetCurrTokenType() == TOKEN_ID) {
+            string id = parser->GetCurrTokenValue();
             parser->Consume(TOKEN_ID);
-            if (Data_Func_Decl()) {
-                return true;
+            ASTNode * data_func_decl = Data_Func_Decl();
+            if (data_func_decl) {
+                return new ASTNode(AST_DATA_DECLS_PRIME_TAIL, id, NULL, type_name, data_func_decl);
             }
+            delete data_func_decl;
         }
     } else {
-        return true;
+        return new ASTNode();
     }
-    return false;
+    delete type_name;
+    return NULL;
 }
 
 /**
-* Production:	<dataFuncDecl> --> <data decls prime> | <func list prime>
+* Production:	<dataFuncDecl> --> <data decls prime> 
+*                               | <func list prime>
+*
+*                               $$ = data decls prime
+*                               $$ = func list prime
 */
-bool Grammar::Data_Func_Decl() {
+ASTNode * Grammar::Data_Func_Decl() {
     //cout<<"Data Func Decl, "<<parser->GetCurrTokenValue()<<endl;
-    if (Data_Decls_Prime()) {
-        return true;
-    } else if (Func_List_Prime()) {
-        return true;
+    ASTNode * data_decls_prime = Data_Decls_Prime();
+    if (data_decls_prime) {
+        return data_decls_prime;
+    } else {
+        ASTNode * func_list_prime = Func_List_Prime();
+        if (func_list_prime) {
+            return func_list_prime;
+        }
+        delete func_list_prime;
     }
-    return false;
+    delete data_decls_prime;
+    return NULL;
 }
 
 /**
  * Production:	<func list> --> <func> <func list>
  *								| empty
+ *
+ *								$$ = ASTNode(FUNC LIST, left=func, right=func list)
+ *								$$ = ASTNode()
  */
-bool Grammar::Func_List() {
+ASTNode * Grammar::Func_List() {
     //cout<<"Func_List, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "int" || 
             parser->GetCurrTokenValue() == "void" ||
             parser->GetCurrTokenValue() == "binary" ||
             parser->GetCurrTokenValue() == "decimal") {
-        return Func() && Func_List();
+        ASTNode * func = Func();
+        if (func) {
+            ASTNode * func_list = Func_List();
+            if (func_list) {
+                return new ASTNode(AST_FUNC_LIST, "", NULL, func, func_list);
+            }
+            delete func_list;
+        }
+        delete func;
     } else {
-        return true;
+        return new ASTNode();
     }
+    return NULL;
 }
 
 /**
  * Production:	<func> --> <func decl> <func tail>
+ *      
+ *                      $$ = ASTNode(FUNC, left=func decl, right=func tail)
 */
-bool Grammar::Func() {
+ASTNode * Grammar::Func() {
     //cout<<"Func, "<<parser->GetCurrTokenValue()<<endl;
-    if (Func_Decl()) {
-        if (Func_Tail()) {
-            return true;
+    ASTNode* func_decl = Func_Decl();
+    if (func_decl) {
+        ASTNode * func_tail = Func_Tail();
+        if (func_tail) {
+            return new ASTNode(AST_FUNC, "", NULL, func_decl, func_tail);
         }
+        delete func_tail;
     }
-    return false;
+    delete func_decl;
+    return NULL;
 }
 
 /**
  * Production:	<func tail> -->semicolon 
  *								| left_brace <data decls> <statements> right_brace 
+ *
+ *								$$ = ASTNode(FUNC TAIL, value=;)
+ *								$$ = ASTNode(FUNC TAIL, left=data decls, right=statements)
  */
-bool Grammar::Func_Tail() {
+ASTNode * Grammar::Func_Tail() {
     //cout<<"Func Tail, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == ";") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_FUNC_TAIL, ";", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "{") {
         parser->Consume(TOKEN_SYMBOL);
-        if (Data_Decls()) {
-            if (Statements()) {
+        ASTNode * data_decls = Data_Decls();
+        if (data_decls) {
+            ASTNode * statements = Statements();
+            if (statements) {
                 if (parser->GetCurrTokenValue() == "}") {
                     parser->Consume(TOKEN_SYMBOL);
                     parser->IncNumFunctions();
-                    return true;
+                    return new ASTNode(AST_FUNC_TAIL, "", NULL, data_decls, statements);
                 }
             }
+            delete statements;
         }
+        delete data_decls;
     }
-    return false;
+    return NULL;
 }
 
 /**
  * Production:	<func decl> --> <typename> ID <func decl prime>
+ *
+ *                          $$ = ASTNode(FUNC DECL, value=ID, left=typename, right=func decl prime)
  */
-bool Grammar::Func_Decl() {
+ASTNode * Grammar::Func_Decl() {
     //cout<<"Func_Decl, "<<parser->GetCurrTokenValue()<<endl;
-    if (Type_Name()) {
+    ASTNode * type_name = Type_Name();
+    if (type_name) {
         ////cout<<"Func_Decl, "<<parser->GetCurrTokenValue()<<endl;
         if (parser->GetCurrTokenType() == TOKEN_ID) {
+            string id = parser->GetCurrTokenValue();
             parser->Consume(TOKEN_ID);
-            if (Func_Decl_Prime()) {
-                return true;
+            ASTNode * func_decl_prime = Func_Decl_Prime();
+            if (func_decl_prime) {
+                return new ASTNode(AST_FUNC_DECL, id, NULL, type_name, func_decl_prime);
             }
+            delete func_decl_prime;
         }
     }
-    return false;
+    delete type_name;
+    return NULL;
 }
 
 /**
  * Production:	<func decl prime> --> left_parenthesis <parameter list> right_parenthesis 
+ *
+ *                                  $$ = parameter list 
  */
-bool Grammar::Func_Decl_Prime() {
+ASTNode * Grammar::Func_Decl_Prime() {
     //cout<<"Func_Decl prime, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "(") {
         parser->Consume(TOKEN_SYMBOL);
-        if (Parameter_List()) {
+        ASTNode * parameter_list = Parameter_List();
+        if (parameter_list) {
             if (parser->GetCurrTokenValue() == ")") {
                 parser->Consume(TOKEN_SYMBOL);
-                return true;
+                return parameter_list;
             }
         }
+        delete parameter_list;
     }
-    return false;
+    return NULL;
 }
 
 /**
@@ -206,245 +288,328 @@ bool Grammar::Func_Decl_Prime() {
 *								| void 
 *								| binary 
 *								| decimal 
+*
+*									$$ = ASTNode(RESERVED)
+*									$$ = ASTNode(RESERVED)
+*									$$ = ASTNode(RESERVED)
+*									$$ = ASTNode(RESERVED)
 */
-bool Grammar::Type_Name() {
+ASTNode * Grammar::Type_Name() {
     //cout<<"Type_Name, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "int") {
         parser->Consume(TOKEN_RESERVED);
-        return true;
+        return new ASTNode(AST_RESERVED, "int", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "void") {
         parser->Consume(TOKEN_RESERVED);
-        return true;
+        return new ASTNode(AST_RESERVED, "void", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "binary") {
         parser->Consume(TOKEN_RESERVED);
-        return true;
+        return new ASTNode(AST_RESERVED, "binary", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "decimal") {
         parser->Consume(TOKEN_RESERVED);
-        return true;
+        return new ASTNode(AST_RESERVED, "decimal", NULL, NULL, NULL);
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<type name prime> --> int
 *									| binary
 *									| decimal
+*
+*									$$ = ASTNode(RESERVED)
+*									$$ = ASTNode(RESERVED)
+*									$$ = ASTNode(RESERVED)
 */
-bool Grammar::Type_Name_Prime() {
+ASTNode * Grammar::Type_Name_Prime() {
     //cout<<"Type_Name, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "int") {
         parser->Consume(TOKEN_RESERVED);
-        return true;
+        return new ASTNode(AST_RESERVED, "int", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "binary") {
         parser->Consume(TOKEN_RESERVED);
-        return true;
+        return new ASTNode(AST_RESERVED, "binary", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "decimal") {
         parser->Consume(TOKEN_RESERVED);
-        return true;
+        return new ASTNode(AST_RESERVED, "decimal", NULL, NULL, NULL);
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<parameter list> --> void <parameter list tail>
 *									| <typename prime> ID <non-empty list prime> 
 *									| empty
+*
+*									$$ = ASTNode(PARAM LIST, value=void, child=parameter list tail)
+*									$$ = ASTNode(PARAM LIST, value=ID, left=typename prime, right=non empty list prime)
+*									$$ = ASTNode()
 */
-bool Grammar::Parameter_List() {
+ASTNode * Grammar::Parameter_List() {
     //cout<<"Parameter_List, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "void") {
         parser->Consume(TOKEN_RESERVED);
-        if (Parameter_List_Tail()) {
-            return true;
+        ASTNode * parameter_list_tail = Parameter_List_Tail();
+        if (parameter_list_tail) {
+            return new ASTNode(AST_PARAM_LIST, "void", parameter_list_tail, NULL, NULL);
         }
-    } else if (Type_Name_Prime()) {
-        if (parser->GetCurrTokenType() == TOKEN_ID) {
-            parser->Consume(TOKEN_ID);
-            if (Non_Empty_List_Prime()) {
-                return true;
-            }
-        }
+        delete parameter_list_tail;
     } else {
-        return true;
+        ASTNode * type_name_prime = Type_Name_Prime();
+        if (type_name_prime) {
+            if (parser->GetCurrTokenType() == TOKEN_ID) {
+                string id = parser->GetCurrTokenValue();
+                parser->Consume(TOKEN_ID);
+                ASTNode * non_empty_list_prime = Non_Empty_List_Prime();
+                if (non_empty_list_prime) {
+                    return new ASTNode(AST_PARAM_LIST, id, NULL, type_name_prime, non_empty_list_prime);
+                }
+                delete non_empty_list_prime;
+            }
+        } else {
+            return new ASTNode();
+        }
+        delete type_name_prime;
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<parameter list tail> --> ID <non-empty list prime> 
 *											| empty
+*
+*											$$ = ASTNode(PARAM LIST TAIL, value=ID, child=non empty list prime)
+*											$$ = ASTNode()
 */
-bool Grammar::Parameter_List_Tail() {
+ASTNode * Grammar::Parameter_List_Tail() {
     //cout<<"Parameter_List tail, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenType() == TOKEN_ID) {
+        string id = parser->GetCurrTokenValue();
         parser->Consume(TOKEN_ID);
-        if (Non_Empty_List_Prime()) {
-            return true;
+        ASTNode * non_empty_list_prime = Non_Empty_List_Prime();
+        if (non_empty_list_prime) {
+            return new ASTNode(AST_PARAM_LIST, id, non_empty_list_prime, NULL, NULL);
         }
+        delete non_empty_list_prime;
     } else {
-        return true;
+        return new ASTNode();
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<non-empty list> --> <type name> ID <non-empty list prime>
+*
+*                                   $$ = ASTNode(NON EMPTY LIST, value=ID, left=type name, right=non empty list prime)
 */
-bool Grammar::Non_Empty_List() {
+ASTNode * Grammar::Non_Empty_List() {
     //cout<<"Non_Empty_List, "<<parser->GetCurrTokenValue()<<endl;
-    if (Type_Name()) {
+    ASTNode * type_name = Type_Name();
+    if (type_name) {
         if (parser->GetCurrTokenType() == TOKEN_ID) {
+            string id = parser->GetCurrTokenValue();
             parser->Consume(TOKEN_ID);
-            if (Non_Empty_List_Prime()) {
-                return true;
+            ASTNode * non_empty_list_prime = Non_Empty_List_Prime();
+            if (non_empty_list_prime) {
+                return new ASTNode(AST_NON_EMPTY_LIST, id, NULL, type_name, non_empty_list_prime);
             }
+            delete non_empty_list_prime;
         }
     }
-    return false;
+    delete type_name;
+    return NULL;
 }
 
 /**
 * Production:	<non-empty list prime> --> comma <type name> ID <non-empty list prime>
 *  											| empty
+*
+*  											$$ = ASTNode(NON EMPTY LIST PRIME, value=ID, left=type name, right=non-empty list prime)
+*  											$$ = ASTNode()
 */
-bool Grammar::Non_Empty_List_Prime() {
+ASTNode * Grammar::Non_Empty_List_Prime() {
     //cout<<"Non_Empty_List_Prime, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == ",") {
         parser->Consume(TOKEN_SYMBOL);
-        if (Type_Name()) {
+        ASTNode * type_name = Type_Name();
+        if (type_name) {
             if (parser->GetCurrTokenType() == TOKEN_ID) {
+                string id = parser->GetCurrTokenValue();
                 parser->Consume(TOKEN_ID);
-                if (Non_Empty_List_Prime()) {
-                    return true;
+                ASTNode * non_empty_list_prime = Non_Empty_List_Prime();
+                if (non_empty_list_prime) {
+                    return new ASTNode(AST_NON_EMPTY_LIST_PRIME, id, NULL, type_name, non_empty_list_prime);
                 }
+                delete non_empty_list_prime;
             }
         }
+        delete type_name;
     } else {
-        return true;
+        return new ASTNode();
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<data decls> --> empty 
 *								| <type name> <id list> semicolon <data decls>
+*
+*								$$ = ASTNode()
+*								$$ = ASTNode(data decls, child=id list, left=type name, right=data decls) 
 */
-bool Grammar::Data_Decls() {
+ASTNode * Grammar::Data_Decls() {
     //cout<<"Data_Decls, "<<parser->GetCurrTokenValue()<<endl;
-    if (Type_Name()) {
-        if (Id_List()) {
+    ASTNode * type_name = Type_Name();
+    if (type_name) {
+        ASTNode * id_list = Id_List();
+        if (id_list) {
             if (parser->GetCurrTokenValue() == ";") {
                 parser->Consume(TOKEN_SYMBOL);
-                if (Data_Decls()) {
-                    return true;
+                ASTNode * data_decls = Data_Decls();
+                if (data_decls) {
+                    return new ASTNode(AST_DATA_DECLS, "", id_list, type_name, data_decls);
                 }
+                delete data_decls;
             }
         }
+        delete id_list;
     } else {
-        return true;
+        delete type_name;
+        return new ASTNode();
     }
-    return false;
+    delete type_name;
+    return NULL;
 }
 
 /**
 * Production:	<id list> --> <id> <id list prime>
+*                           
+*                           $$ = ASTNode(ID LIST, left=id, right=id list prime)
 */
-bool Grammar::Id_List() {
+ASTNode * Grammar::Id_List() {
     //cout<<"Id_List, "<<parser->GetCurrTokenValue()<<endl;
-    if (Id()) {
-        if (Id_List_Prime()) {
-            return true;
+    ASTNode* id = Id();
+    if (id) {
+        ASTNode * id_list_prime = Id_List_Prime();
+        if (id_list_prime) {
+            return new ASTNode(AST_ID_LIST, "", NULL, id, id_list_prime);
         }
+        delete id_list_prime;
     }
-    return false;
+    delete id;
+    return NULL;
 }
 
 /**
 * Production:	<id list prime> --> comma <id list> 
 *									| empty
+*
+*									$$ = ASTNode(ID LIST, value="," child=id list)
+*									$$ = ASTNode()
 */
-bool Grammar::Id_List_Prime() {
+ASTNode * Grammar::Id_List_Prime() {
     //cout<<"Id_List_Prime, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == ",") {
         parser->Consume(TOKEN_SYMBOL);
-        if (Id_List()) {
-            return true;
+        ASTNode* id_list = Id_List();
+        if (id_list) {
+            return new ASTNode(AST_ID_LIST, ",", id_list, NULL, NULL);
         }
+        delete id_list;
     } else {
-        return true;
+        return new ASTNode();
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<id> --> ID <id tail>
+*                        
+*                        $$ = ASTNode(ID, value=ID, child=id tail)
 */
-bool Grammar::Id() {
+ASTNode * Grammar::Id() {
     //cout<<"Id, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenType() == TOKEN_ID) {
+        string id = parser->GetCurrTokenValue();
         parser->Consume(TOKEN_ID);
-        if (Id_Tail()) {
+        ASTNode* id_tail = Id_Tail();
+        if (id_tail) {
             parser->IncNumVariables();
-            return true;
+            return new ASTNode(AST_ID, id, id_tail, NULL, NULL);
         }
+        delete id_tail;
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<id tail> --> left_bracket <expression> right_bracket 
 *								| empty
+*
+*								$$ = ASTNode(ARRAY ELEMENT, child=expression)
+*								$$ = ASTNode()
 */
-bool Grammar::Id_Tail() {
+ASTNode * Grammar::Id_Tail() {
     //cout<<"Id Tail, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "[") {
         parser->Consume(TOKEN_SYMBOL);
-        if (Expression()) {
+        ASTNode* expression = Expression();
+        if (expression) {
             if (parser->GetCurrTokenValue() == "]") {
                 parser->Consume(TOKEN_SYMBOL);
-                return true;
+                return new ASTNode(AST_ARRAY_ELEMENT, "", expression, NULL, NULL);
             }
         }
+        delete expression;
     } else {
-        return true;
+        return new ASTNode();
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<block statements> --> left_brace <statements> right_brace 
+*                                   
+*                                   $$ = ASTNode(BLOCK, child=statements)
 */
-bool Grammar::Block_Statements() {
+ASTNode * Grammar::Block_Statements() {
     //cout<<"Block_Statements, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "{") {
         parser->Consume(TOKEN_SYMBOL);
-        if (Statements()) {
+        ASTNode * statements = Statements();
+        if (statements) {
             //cout<<"In block statements\n";
             if (parser->GetCurrTokenValue() == "}") {
                 parser->Consume(TOKEN_SYMBOL);
-                return true;
+                return new ASTNode(AST_BLOCK, "", statements, NULL, NULL);
             }
         }
+        delete statements;
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<statements> --> <statement> <statements> 
 *								| empty
+*
+*								$$ = ASTNode(STATEMENT, left=statement, right=statements)
 */
-bool Grammar::Statements() {
+ASTNode * Grammar::Statements() {
     //cout<<"Statements, "<<parser->GetCurrTokenValue()<<endl;
-    if (Statement()) {
+    ASTNode * statement = Statement();
+    if (statement) {
         parser->IncNumStatements();
         //cout<<"Back in statements from statement"<<endl;
-        if (Statements()) {
-            return true;
+        ASTNode * statements = Statements();
+        if (statements) {
+            return new ASTNode(AST_STATEMENT, "", NULL, statement, statements);
         }
     } else {
-        return true;
+        return new ASTNode();
     }
-    return false;
+    delete statement;
+    return NULL;
 }
 
 /**
@@ -457,254 +622,362 @@ bool Grammar::Statements() {
 *								| read left_parenthesis  ID right_parenthesis semicolon 
 *								| write left_parenthesis <expression> right_parenthesis semicolon 
 *								| print left_parenthesis  STRING right_parenthesis semicolon 
+*
+*								$$ = ASTNode(ID_STATEMENT, value=id, child=statement tail)
+*								$$ = if statement
+*								$$ = while statement
+*								$$ = return statement
+*								$$ = breakstatement
+*								$$ = continue statement
+*								$$ = ASTNode(READ, value=id)
+*								$$ = ASTNode(WRITE, child=expression)
+*								$$ = ASTNode(print, value=string)
 */
-bool Grammar::Statement() {
+ASTNode * Grammar::Statement() {
     //cout<<"Statement, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenType() == TOKEN_ID) {
+        string id = parser->GetCurrTokenValue();
         parser->Consume(TOKEN_ID);
-        if (Statement_Tail()) {
-            return true;
+        ASTNode * statement_tail = Statement_Tail();
+        if (statement_tail) {
+            return new ASTNode(AST_ID_STATEMENT, id, statement_tail, NULL, NULL);
         }
-    } else if (If_Statement()) {
-        return true;
-    } else if (While_Statement()) {
-        return true;
-    } else if (Return_Statement()) {
-        return true;
-    } else if (Break_Statement()) {
-        return true;
-    } else if (Continue_Statement()) {
-        return true;
-    } else if (parser->GetCurrTokenValue() == "read") {
-        //cout<<"read\n";
-        parser->Consume(TOKEN_RESERVED);
-        if (parser->GetCurrTokenValue() == "(") {
-            parser->Consume(TOKEN_SYMBOL);
-            if (parser->GetCurrTokenType() == TOKEN_ID) {
-                parser->Consume(TOKEN_ID);
-                if (parser->GetCurrTokenValue() == ")") {
-                    parser->Consume(TOKEN_SYMBOL);
-                    if (parser->GetCurrTokenValue() == ";") {
-                        parser->Consume(TOKEN_SYMBOL);
-                        return true;
+        delete statement_tail;
+    } else {
+        ASTNode * if_statement = If_Statement();
+        if (if_statement) {
+            return if_statement;
+        } else {
+            ASTNode * while_statement = While_Statement();
+            if (while_statement) {
+                return while_statement;
+            } else {
+                ASTNode * return_statement = Return_Statement();
+                if (return_statement) {
+                    return return_statement;
+                } else {
+                    ASTNode * break_statement = Break_Statement();
+                    if (break_statement) {
+                        return break_statement;
+                    } else {
+                        ASTNode * continue_statement = Continue_Statement();
+                        if (continue_statement) {
+                            return continue_statement;
+                        } else if (parser->GetCurrTokenValue() == "read") {
+                            //cout<<"read\n";
+                            parser->Consume(TOKEN_RESERVED);
+                            if (parser->GetCurrTokenValue() == "(") {
+                                parser->Consume(TOKEN_SYMBOL);
+                                if (parser->GetCurrTokenType() == TOKEN_ID) {
+                                    string id = parser->GetCurrTokenValue();
+                                    parser->Consume(TOKEN_ID);
+                                    if (parser->GetCurrTokenValue() == ")") {
+                                        parser->Consume(TOKEN_SYMBOL);
+                                        if (parser->GetCurrTokenValue() == ";") {
+                                            parser->Consume(TOKEN_SYMBOL);
+                                            return new ASTNode(AST_READ, id, NULL, NULL, NULL);
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (parser->GetCurrTokenValue() == "write") {
+                            //cout<<"write\n";
+                            parser->Consume(TOKEN_RESERVED);
+                            if (parser->GetCurrTokenValue() == "(") {
+                                parser->Consume(TOKEN_SYMBOL);
+                                ASTNode * expression = Expression();
+                                if (expression) {
+                                    if (parser->GetCurrTokenValue() == ")") {
+                                        parser->Consume(TOKEN_SYMBOL);
+                                        if (parser->GetCurrTokenValue() == ";") {
+                                            parser->Consume(TOKEN_SYMBOL);
+                                            return new ASTNode(AST_WRITE, "", expression, NULL, NULL);
+                                        }
+                                    }
+                                }
+                                delete expression;
+                            }
+                        } else if (parser->GetCurrTokenValue() == "print") {
+                            //cout<<"print\n";
+                            parser->Consume(TOKEN_RESERVED);
+                            if (parser->GetCurrTokenValue() == "(") {
+                                parser->Consume(TOKEN_SYMBOL);
+                                if (parser->GetCurrTokenType() == TOKEN_STRING) {
+                                    string val = parser->GetCurrTokenValue();
+                                    parser->Consume(TOKEN_STRING);
+                                    if (parser->GetCurrTokenValue() == ")") {
+                                        parser->Consume(TOKEN_SYMBOL);
+                                        if (parser->GetCurrTokenValue() == ";") {
+                                            parser->Consume(TOKEN_SYMBOL);
+                                            return new ASTNode(AST_PRINT, val, NULL, NULL, NULL);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
+                    delete break_statement;
                 }
+                delete return_statement;
             }
+            delete while_statement;
         }
-    } else if (parser->GetCurrTokenValue() == "write") {
-        //cout<<"write\n";
-        parser->Consume(TOKEN_RESERVED);
-        if (parser->GetCurrTokenValue() == "(") {
-            parser->Consume(TOKEN_SYMBOL);
-            if (Expression()) {
-                if (parser->GetCurrTokenValue() == ")") {
-                    parser->Consume(TOKEN_SYMBOL);
-                    if (parser->GetCurrTokenValue() == ";") {
-                        parser->Consume(TOKEN_SYMBOL);
-                        return true;
-                    }
-                }
-            }
-        }
-    } else if (parser->GetCurrTokenValue() == "print") {
-        //cout<<"print\n";
-        parser->Consume(TOKEN_RESERVED);
-        if (parser->GetCurrTokenValue() == "(") {
-            parser->Consume(TOKEN_SYMBOL);
-            if (parser->GetCurrTokenType() == TOKEN_STRING) {
-                parser->Consume(TOKEN_STRING);
-                if (parser->GetCurrTokenValue() == ")") {
-                    parser->Consume(TOKEN_SYMBOL);
-                    if (parser->GetCurrTokenValue() == ";") {
-                        parser->Consume(TOKEN_SYMBOL);
-                        return true;
-                    }
-                }
-            }
-        }
+        delete if_statement;
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<statement tail> --> <assignment tail> 
 *									| <func call tail>
+*
+*									$$ = assignment
+*									$$ = func call 
 */
-bool Grammar::Statement_Tail() {
+ASTNode * Grammar::Statement_Tail() {
     //cout<<"Statement tail, "<<parser->GetCurrTokenValue()<<endl;
-    if (Assignment_Tail()) {
-        return true;
-    } else if (Func_Call_Tail()) {
-        return true;
+    ASTNode* assignment_tail = Assignment_Tail();
+    if (assignment_tail) {
+        return assignment_tail;
+    } else {
+        ASTNode* func_call_tail = Func_Call_Tail();
+        if (func_call_tail) {
+            return func_call_tail;
+        }
+        delete func_call_tail;
     }
-    return false;
+    delete assignment_tail; 
+    return NULL;
 }
 
 /**
 * Production:	<assignment tail> --> <id tail> equal_sign <expression> semicolon 
+*                   
+*                                   $$ = ASTNode(ASSIGNMENT, left=id tail, right=expression)
 */
-bool Grammar::Assignment_Tail() {
+ASTNode * Grammar::Assignment_Tail() {
     //cout<<"assignment tail, "<<parser->GetCurrTokenValue()<<endl;
-    if (Id_Tail()) {
+    ASTNode* id_tail = Id_Tail();
+    if (id_tail) {
         if (parser->GetCurrTokenValue() == "=") {
             parser->Consume(TOKEN_SYMBOL);
-            if (Expression()) {
+            ASTNode * expression = Expression();
+            if (expression) {
                 if (parser->GetCurrTokenValue() == ";") {
                     parser->Consume(TOKEN_SYMBOL);
-                    return true;
+                    return new ASTNode(AST_ASSIGNMENT, "", NULL, id_tail, expression);
                 }
             }
+            delete expression;
         }
     }
-    return false;
+    delete id_tail;
+    return NULL;
 }
 
 /**
 * Production:	<func call tail> --> left_parenthesis <expr list> right_parenthesis semicolon 
+*
+*                                   $$ = ASTNode(FUNC CALL, child=expr list, value=;)
 */
-bool Grammar::Func_Call_Tail() {
+ASTNode * Grammar::Func_Call_Tail() {
     //cout<<"Func_Call tail, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "(") {
         parser->Consume(TOKEN_SYMBOL);
-        if (Expr_List()) {
+        ASTNode* expr_list = Expr_List();
+        if (expr_list) {
             if (parser->GetCurrTokenValue() == ")") {
                 parser->Consume(TOKEN_SYMBOL);
                 if (parser->GetCurrTokenValue() == ";") {
                     parser->Consume(TOKEN_SYMBOL);
-                    return true;
+                    return new ASTNode(AST_FUNC_CALL, ";", expr_list, NULL, NULL);
                 }
             }
         }
+        delete expr_list;
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<expr list> --> <non-empty expr list> 
 *  								| empty
+*
+*  								$$ = ASTNode(EXPR LIST, child=non-empty expr list)
+*  								$$ = ASTNode()
 */
-bool Grammar::Expr_List() {
+ASTNode * Grammar::Expr_List() {
     //cout<<"Expr_List, "<<parser->GetCurrTokenValue()<<endl;
-    if (Non_Empty_Expr_List()) {
-        return true;
+    ASTNode * non_empty_expr_list = Non_Empty_Expr_List();
+    if (non_empty_expr_list) {
+        return new ASTNode(AST_EXPR_LIST, "", non_empty_expr_list, NULL, NULL);
     } else {
-        return true;
+        delete non_empty_expr_list;
+        return new ASTNode();
     }
-    return false;
+    delete non_empty_expr_list;
+    return NULL;
 }
 
 /**
 * Production:	<non-empty expr list> --> <expression> <non-empty expr list prime> 
+*
+*                                       $$ = ASTNode(NON EMPTY EXPR LIST, left=expression, right=non-empty expr list prime)
 */
-bool Grammar::Non_Empty_Expr_List() {
+ASTNode * Grammar::Non_Empty_Expr_List() {
     //cout<<"Non_Empty_Expr_List, "<<parser->GetCurrTokenValue()<<endl;
-    if (Expression()) {
-        if (Non_Empty_Expr_List_Prime()) {
-            return true;
+    ASTNode* expression = Expression();
+    if (expression) {
+        ASTNode* non_empty_expr_list_prime = Non_Empty_Expr_List_Prime();
+        if (non_empty_expr_list_prime) {
+            return new ASTNode(AST_NON_EMPTY_EXPR_LIST, "", NULL, expression, non_empty_expr_list_prime);
         }
+        delete non_empty_expr_list_prime;
     }
-    return false;
+    delete expression;
+    return NULL;
 }
 
 /**
 * Production:	<non-empty expr list prime> --> comma <expression> <non-empty expr list prime>
 *												| empty
+*
+*												$$ = ASTNode(NONEMPTYEXPR LIST PRIME, value=, left=expression, right=non-empty expr list prime)
+*												$$ = ASTNode()
 */
-bool Grammar::Non_Empty_Expr_List_Prime() {
+ASTNode * Grammar::Non_Empty_Expr_List_Prime() {
     //cout<<"Non_Empty_Expr_List_Prime, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == ",") {
         parser->Consume(TOKEN_SYMBOL);
-        if (Expression()) {
-            if (Non_Empty_Expr_List_Prime()) {
-                return true;
+        ASTNode* expression = Expression();
+        if (expression) {
+            ASTNode* non_empty_expr_list_prime = Non_Empty_Expr_List_Prime();
+            if (non_empty_expr_list_prime) {
+                return new ASTNode(AST_NON_EMPTY_EXPR_LIST, ",", NULL, expression, non_empty_expr_list_prime);
             }
+            delete non_empty_expr_list_prime;
         }
+        delete expression;
     } else {
-        return true;
+        return new ASTNode();
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<if statement> --> if left_parenthesis <condition expression> right_parenthesis <block statements> 
+*           
+*                               $$ = ASTNode(IF_STATMENT, left=condition expression, right=block statements)
 */
-bool Grammar::If_Statement() {
+ASTNode * Grammar::If_Statement() {
     //cout<<"If_Statement, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "if") {
         parser->Consume(TOKEN_RESERVED);
         if (parser->GetCurrTokenValue() == "(") {
             parser->Consume(TOKEN_SYMBOL);
-            if (Condition_Expression()) {
+            ASTNode* condition_expression = Condition_Expression();
+            if (condition_expression) {
                 if (parser->GetCurrTokenValue() == ")") {
                     parser->Consume(TOKEN_SYMBOL);
-                    if (Block_Statements()) {
-                        return true;
+                    ASTNode* block_statements = Block_Statements();
+                    if (block_statements) {
+                        return new ASTNode(AST_IF, "", NULL, condition_expression, block_statements);
                     }
+                    delete block_statements;
                 }
             }
+            delete condition_expression;
         }
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<condition expression> -->  <condition> <condition expression tail>
+*
+*                                       $$ = ASTNode(CONDTION EXPR, left=condition, right=condition expression tail)
 */
-bool Grammar::Condition_Expression() {
+ASTNode * Grammar::Condition_Expression() {
     //cout<<"Condition_Expression, "<<parser->GetCurrTokenValue()<<endl;
-    if (Condition()) {
-        if (Condition_Expression_Tail()) {
-            return true;
+
+    ASTNode* condition = Condition();
+    if (condition) {
+        ASTNode* condition_expression_tail = Condition_Expression_Tail();
+        if (condition_expression_tail) {
+            return new ASTNode(AST_CONDITION_EXPR, "", NULL, condition, condition_expression_tail);
         }
+        delete condition_expression_tail;
     }
-    return false;
+    delete condition;
+    return NULL;
 }
 
 /**
 * Production:	<condition expression tail> -->  <condition op> <condition> 
 *												| empty
+*
+*												$$ = ASTNode(CONDTION EXPR TAIL, value=condtion op, child=condition)
+*												$$ = ASTNode()
 */
-bool Grammar::Condition_Expression_Tail() {
+ASTNode * Grammar::Condition_Expression_Tail() {
     //cout<<"Condition_Expression tail, "<<parser->GetCurrTokenValue()<<endl;
-    if (Condition_Op()) {
-        if (Condition()) {
-            return true;
+    ASTNode* condition_op = Condition_Op();
+    if (condition_op) {
+        ASTNode* condition = Condition();
+        if (condition) {
+            string val = condition_op->GetValue();
+            delete condition_op;
+            return new ASTNode(AST_CONDITION_EXPR, val, condition, NULL, NULL);
         }
+        delete condition;
     } else {
-        return true;
+        delete condition_op;
+        return new ASTNode();
     }
-    return false;
+    delete condition_op;
+    return NULL;
 }
        
 /**
 * Production:	<condition op> --> double_and_sign 
 *								| double_or_sign
+*
+*								$$ = ASTNode(CONDTION OP)
+*								$$ = ASTNode(CONDTION OP)
 */
-bool Grammar::Condition_Op() {
+ASTNode * Grammar::Condition_Op() {
     //cout<<"Condition_Op, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "&&") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_CONDITION_OP, "&&", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "||") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_CONDITION_OP, "||", NULL, NULL, NULL);
     }
-    return false;
+    return NULL;
 } 
 
 /**
 * Production:	<condition> --> <expression> <comparison op> <expression> 
+*           
+*                           $$ = ASTNode(CONDITION, value=comparison op, left=expression1, right=expression2)
 */
-bool Grammar::Condition() {
+ASTNode * Grammar::Condition() {
     //cout<<"Condition, "<<parser->GetCurrTokenValue()<<endl;
-    if (Expression()) {
-        if (Comparison_Op()) {
-            if (Expression()) {
-                return true;
+    ASTNode * expression1 = Expression();
+    if (expression1) {
+        ASTNode* comparison_op = Comparison_Op();
+        if (comparison_op) {
+            ASTNode* expression2 = Expression();
+            if (expression2) {
+                return new ASTNode(AST_CONDITION, comparison_op->GetValue(), NULL, expression1, expression2);
             }
+            delete expression2;
         }
+        delete comparison_op;
     }
-    return false;
+    delete expression1;
+    return NULL;
 }
 
 /**
@@ -714,207 +987,277 @@ bool Grammar::Condition() {
 *									| >= 
 *									| < 
 *									| <=
+*
+*									$$ = ASTNode(COMPARISION OP)
+*									$$ = ASTNode(COMPARISION OP)
+*									$$ = ASTNode(COMPARISION OP)
+*									$$ = ASTNode(COMPARISION OP)
+*									$$ = ASTNode(COMPARISION OP)
 */
-bool Grammar::Comparison_Op() {
+ASTNode * Grammar::Comparison_Op() {
     //cout<<"Comparison_Op, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "==") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_COMPARISON_OP, "==", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "!=") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_COMPARISON_OP, "!=", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == ">") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_COMPARISON_OP, ">", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == ">=") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_COMPARISON_OP, ">=", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "<") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_COMPARISON_OP, "<", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "<=") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_COMPARISON_OP, "<=", NULL, NULL, NULL);
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<while statement> --> while left_parenthesis <condition expression> right_parenthesis <block statements> 
+*                                   
+*                                   $$ = ASTNode(WHILE, left=condition expression, right=block statements)
 */
-bool Grammar::While_Statement() {
+ASTNode * Grammar::While_Statement() {
     //cout<<"While_Statement, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "while") {
         parser->Consume(TOKEN_RESERVED);
         if (parser->GetCurrTokenValue() == "(") {
             parser->Consume(TOKEN_SYMBOL);
-            if (Condition_Expression()) {
+            ASTNode* condition_expression = Condition_Expression();
+            if (condition_expression) {
                 if (parser->GetCurrTokenValue() == ")") {
                     parser->Consume(TOKEN_SYMBOL);
-                    if (Block_Statements()) {
-                        return true;
+                    ASTNode* block_statements = Block_Statements();
+                    if (block_statements) {
+                        return new ASTNode(AST_WHILE, "", NULL, condition_expression, block_statements);
                     }
+                    delete block_statements;
                 }
             }
+            delete condition_expression;
         }
     }
-    return false;
+    return NULL;
 }
 
 /**
-* Production:	<return statement> --> return <return statement prime>
+* Production:	<return statement> --> return <return statement tail>
+*                                       
+*                                       $$ = ASTNode(RETURN, child=return tail)
 */
-bool Grammar::Return_Statement() {
+ASTNode * Grammar::Return_Statement() {
     //cout<<"Return_Statement, "<<parser->GetCurrTokenValue()<<endl;
+
     if (parser->GetCurrTokenValue() == "return") {
         parser->Consume(TOKEN_RESERVED);
-        if (Return_Statement_Tail()) {
-            return true;
+        ASTNode * return_statement_tail = Return_Statement_Tail();
+        if (return_statement_tail) {
+            return return_statement_tail;
         }
+        delete return_statement_tail;
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<return statement tail> --> <expression> semicolon 
 *											| semicolon 
+*
+*											$$ = ASTNode(RETURN, child=expression)
+*											$$ = ASTNode(RETURN)
 */
-bool Grammar::Return_Statement_Tail() {
+ASTNode * Grammar::Return_Statement_Tail() {
     //cout<<"Return_Statement tail, "<<parser->GetCurrTokenValue()<<endl;
-    if (Expression()) {
+
+    ASTNode* expression = Expression();
+    if (expression) {
         if (parser->GetCurrTokenValue() == ";") {
             parser->Consume(TOKEN_SYMBOL);
-            return true;
+            return new ASTNode(AST_RETURN, "", expression, NULL, NULL);
         }
     } else if (parser->GetCurrTokenValue() == ";") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_RETURN, "", NULL, NULL, NULL);
     }
-    return false;
+    delete expression;
+    return NULL;
 }
 
 /**
 * Production:	<break statement> ---> break semicolon 
+*                                       $$ = ASTNode(break)
 */
-bool Grammar::Break_Statement() {
+ASTNode * Grammar::Break_Statement() {
     //cout<<"Break_Statement, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "break") {
         parser->Consume(TOKEN_RESERVED);
         if (parser->GetCurrTokenValue() == ";") {
             parser->Consume(TOKEN_SYMBOL);
-            return true;
+            return new ASTNode(AST_BREAK, "", NULL, NULL, NULL);
         }
     }
-    return false;
+    return NULL;
 }
 
-/**
+/** 
 * Production:	<continue statement> ---> continue semicolon
+*                                       $$ = ASTNode(CONTINUE)
 */
-bool Grammar::Continue_Statement() {
+ASTNode * Grammar::Continue_Statement() {
     //cout<<"Continue_Statement, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "continue") {
         parser->Consume(TOKEN_RESERVED);
         if (parser->GetCurrTokenValue() == ";") {
             parser->Consume(TOKEN_SYMBOL);
-            return true;
+            return new ASTNode(AST_CONTINUE, "", NULL, NULL, NULL);
         }
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<expression> --> <term> <expression prime> 
+*                         $$ = ASTNode(EXPRESSION, left=term, right=expression prime)
 */
-bool Grammar::Expression() {
+ASTNode * Grammar::Expression() {
     //cout<<"Expression, "<<parser->GetCurrTokenValue()<<endl;
-    if (Term()) {
-        if (Expression_Prime()) {
-            return true;
+
+    ASTNode * term = Term();
+    if (term) {
+        ASTNode * expression_prime = Expression_Prime();
+        if (expression_prime) {
+            return new ASTNode(AST_EXPRESSION, "", NULL, term, expression_prime);
         }
+        delete expression_prime;
     }
-    return false;
+    delete term;
+    return NULL;
 }
 
 /**
 * Production:	<expression prime> --> <addop> <term> <expression prime>
 *				| empty
+*               $$ = ASTNode(EXPRESSION, value=addop, left=term, right=expression prime) 
+*               $$ = ASTNode()
 */
-bool Grammar::Expression_Prime() {
+ASTNode * Grammar::Expression_Prime() {
     //cout<<"Expression_Prime, "<<parser->GetCurrTokenValue()<<endl;
-    if (Addop()) {
-        if (Term()) {
-            if (Expression_Prime()) {
-                return true;
+
+    ASTNode * addop = Addop();
+    if (addop) {
+        ASTNode * term = Term();
+        if (term) {
+            ASTNode * expression_prime = Expression_Prime();
+            if (expression_prime) {
+                ASTNode * result = new ASTNode(AST_EXPRESSION, addop->GetValue(), NULL, term, expression_prime);
+                delete addop;
+                return result;
             }
+            delete expression_prime;
         }
+        delete term;
     } else {
-        return true;
+        delete addop;
+        return new ASTNode();
     }
-    return false;
+    delete addop;
+    return NULL;
 }
 
 /**
 * Production:	<addop> --> plus_sign 
 *							| minus_sign 
+*
+*							$$ = AST(OP)
+*							$$ = AST(OP)
 */
-bool Grammar::Addop() {
+ASTNode * Grammar::Addop() {
     //cout<<"Addop, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "+") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_OP, "+", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "-") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_OP, "-", NULL, NULL, NULL);
     }
-    return false;
+    return NULL;
 }
 
 /**
 * Production:	<term> --> <factor> <term prime> 
+*                        
+*                         $$ = ASTNode(TERM, left=factor, right=term prime)
 */
-bool Grammar::Term() {
+ASTNode * Grammar::Term() {
     //cout<<"Term, "<<parser->GetCurrTokenValue()<<endl;
-    if (Factor()) {
-        if (Term_Prime()) {
-            return true;
+
+    ASTNode * factor = Factor();
+    if (factor) {
+        ASTNode * term_prime = Term_Prime();
+        if (term_prime) {
+            return new ASTNode(AST_TERM, "", NULL, factor, term_prime);
         }
+        delete term_prime;
     }
-    return false;
+    delete factor;
+    return NULL;
 }
 
 /**
 * Production:	<term prime> --> <mulop> <factor> <term prime>
 *                               | empty
+*
+*                               $$ = ASTNode(TERM_PRIME, value=mulop, left=factor, right=term prime) 
+*                               $$ = ASTNode()
 */
-bool Grammar::Term_Prime() {
+ASTNode * Grammar::Term_Prime() {
     //cout<<"Term_Prime, "<<parser->GetCurrTokenValue()<<endl;
-    if (Mulop()) {
-        if (Factor()) {
-            if (Term_Prime()) { 
-                return true;
+
+    ASTNode * mulop = Mulop();
+
+    if (mulop) {
+        ASTNode * factor = Factor();
+        if (factor) {
+            ASTNode * term_prime = Term_Prime();
+            if (term_prime) {
+                ASTNode * term_prime1 = new ASTNode(AST_TERM, mulop->GetValue(), NULL, factor, term_prime);
+                delete mulop;
+                return term_prime1;
             }
+            delete term_prime;
         }
+        delete factor;
     } else {
-        return true;
+        delete mulop;
+        return new ASTNode();
     }
-    return false;
+    delete mulop;
+    return NULL;
 }
 
 /**
 * Production:	<mulop> --> star_sign 
 *							| forward_slash
+*
+*							$$ = ASTNode(OP)
+*							$$ = ASTNode(OP)
 */
-bool Grammar::Mulop() {
+ASTNode * Grammar::Mulop() {
     //cout<<"Mulop, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "*") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_OP, "*", NULL, NULL, NULL);
     } else if (parser->GetCurrTokenValue() == "/") {
         parser->Consume(TOKEN_SYMBOL);
-        return true;
+        return new ASTNode(AST_OP, "/", NULL, NULL, NULL);
     }
-    return false;
+    return NULL;
 }
 
 /**
@@ -922,60 +1265,76 @@ bool Grammar::Mulop() {
 *							| NUMBER 
 *							| minus_sign NUMBER 
 *							| left_parenthesis <expression> right_parenthesis
+*
+*                           $$ = ASTNode(FACTOR, value=ID, child=factor_tail)
+*                           $$ = ASTNode(FACTOR, value=NUMBER)
+*                           $$ = ASTNode(FACTOR, value=-NUMBER)
+*                           $$ = ASTNode(FACTOR, child=expression) 
 */
-bool Grammar::Factor() {
+ASTNode * Grammar::Factor() {
     //cout<<"Factor, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenType() == TOKEN_ID) {
+        string val = parser->GetCurrTokenValue();
         parser->Consume(TOKEN_ID);
-        if (Factor_Tail()) {
-            return true;
-        }
+        ASTNode* factor_tail = Factor_Tail();
+        return new ASTNode(AST_FACTOR, val, factor_tail, NULL, NULL); 
     } else if (parser->GetCurrTokenType() == TOKEN_NUMBER) {
+        string val = parser->GetCurrTokenValue();
         parser->Consume(TOKEN_NUMBER);
-        return true;
+        return new ASTNode(AST_FACTOR, val, NULL, NULL, NULL); 
     } else if (parser->GetCurrTokenValue() == "-") {
         parser->Consume(TOKEN_SYMBOL);
         if (parser->GetCurrTokenType() == TOKEN_NUMBER) {
+            string val = "-"+parser->GetCurrTokenValue();
             parser->Consume(TOKEN_NUMBER);
-            return true;
+            return new ASTNode(AST_FACTOR, val, NULL, NULL, NULL); 
         }
     } else if (parser->GetCurrTokenValue() == "(") {
         parser->Consume(TOKEN_SYMBOL);
-        if (Expression()) {
+        ASTNode * expression = Expression(); 
+        if (expression) {
             if (parser->GetCurrTokenValue() == ")") {
                 parser->Consume(TOKEN_SYMBOL);
-                return true;
+                return new ASTNode(AST_FACTOR, "", expression, NULL, NULL);
             }
         }
+        delete expression;
     }
-    return false;
+    return NULL;
 }
 
 /**
-* Production:	<factor tail> --> left_bracket <expression> right_bracket 
+* Production:	<factor tail> --> left_bracket <expression> right_bracket  
 *									| left_parenthesis <expr list> right_parenthesis 
-*									| empty
+*									| empty 
+*									$$ = ASTNode(ARY_ELEMENT, child=expression)
+*									$$ = ASTNode(FUNC_CALL, child=expr list)
+*									$$ = ASTNode()
 */
-bool Grammar::Factor_Tail() {
+ASTNode * Grammar::Factor_Tail() {
     //cout<<"Factor tail, "<<parser->GetCurrTokenValue()<<endl;
     if (parser->GetCurrTokenValue() == "[") {
         parser->Consume(TOKEN_SYMBOL);
-        if (Expression()) {
+        ASTNode* expression = Expression();
+        if (expression) {
             if (parser->GetCurrTokenValue() == "]") {
                 parser->Consume(TOKEN_SYMBOL);
-                return true;
+                return new ASTNode(AST_ARRAY_ELEMENT, "", expression, NULL, NULL);
             }
         }
+        delete expression;
     } else if (parser->GetCurrTokenValue() == "(") {
         parser->Consume(TOKEN_SYMBOL);
-        if (Expr_List()) {
+        ASTNode* expr_list = Expr_List();
+        if (expr_list) {
             if (parser->GetCurrTokenValue() == ")") {
                 parser->Consume(TOKEN_SYMBOL);
-                return true;
+                return new ASTNode(AST_FUNC_CALL, "", expr_list, NULL, NULL);
             }
         }
+        delete expr_list;
     } else {
-        return true;
+        return new ASTNode();
     }
-    return false;
+    return NULL;
 }
