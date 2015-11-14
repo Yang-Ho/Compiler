@@ -40,14 +40,14 @@ int main(int argc, char* argv[]) {
         } 
         parser.AddToken(t);
     }
-    ASTNode * ast_tree = parser.Parse();
+    StmtNode * ast_tree = parser.Parse();
     if (ast_tree) {
         //cout<<"Pass variable "<<parser.GetNumVariables()<<" functions "<<parser.GetNumFunctions()<<" statement "<<parser.GetNumStatements()<<endl;
         cout<<"Successfully parsed the program!\n";
         //cout<<"Output file: "<<parser.GetOutputFileName()<<"\n";
-        cout<<"emitting code\n";
-        generator->Emit(ast_tree);
-        cout<<"Done emitting code\n";
+        //cout<<"emitting code\n";
+        //generator->Emit(ast_tree);
+        //cout<<"Done emitting code\n";
     } else {
         cout<<"Falied to parse\n";
     }

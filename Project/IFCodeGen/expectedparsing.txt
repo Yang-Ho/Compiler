@@ -1,0 +1,24 @@
+Input file: ../tests/automaton.c Successfully parsed the program!
+Input file: ../tests/binrep.c Successfully parsed the program!
+Input file: ../tests/branch.c Successfully parsed the program!
+Input file: ../tests/errorString.c Scanning error: Unidentified token %
+Input file: ../tests/expression.c Successfully parsed the program!
+Input file: ../tests/fibonacci.c Successfully parsed the program!
+Input file: ../tests/foo.c Falied to parse
+Input file: ../tests/formulae.c Successfully parsed the program!
+Input file: ../tests/funcall.c Successfully parsed the program!
+Input file: ../tests/funcall2.c Successfully parsed the program!
+Input file: ../tests/illegal.c Successfully parsed the program!
+Input file: ../tests/loop.c Successfully parsed the program!
+Input file: ../tests/mandel.c Successfully parsed the program!
+Input file: ../tests/max.c Successfully parsed the program!
+Input file: ../tests/parameter.c Successfully parsed the program!
+Input file: ../tests/parse.c Falied to parse
+Input file: ../tests/parse2.c Scanning error: Unidentified token @
+Input file: ../tests/polymorphism.c Successfully parsed the program!
+Input file: ../tests/recursion.c Successfully parsed the program!
+Input file: ../tests/sort.c Successfully parsed the program!
+Input file: ../tests/square.c Successfully parsed the program!
+Input file: ../tests/tax.c Successfully parsed the program!
+Input file: ../tests/times8.c Successfully parsed the program!
+Input file: ../tests/trivial.c Successfully parsed the program!

@@ -66,7 +66,7 @@ void Parser::AddToken(Token *new_token) {
     tokens->push_back(new_token);
 }
 
-ASTNode *Parser::Parse() {
+StmtNode *Parser::Parse() {
     tokenIT = tokens->begin();
     while (tokenIT != tokens->end() && (*tokenIT)->GetTokenType() == TOKEN_META) {
         if ((*tokenIT)->GetTokenType() == TOKEN_META) {
@@ -75,9 +75,14 @@ ASTNode *Parser::Parse() {
         ++tokenIT;
     }
     if (tokenIT != tokens->end()) {
-        return grammar->Program();
+        StmtNode * result = grammar->Program();
+        if (tokenIT == tokens->end()-1) {
+            return result;
+        } else {
+            return  NULL;
+        }
     }
-    return new ASTNode();
+    return new StmtNode();
 }
 
 

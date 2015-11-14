@@ -16,106 +16,56 @@ class Grammar {
         void LoadParser(Parser *newparser);
 
         // Grammar productions
-        ASTNode * Program();
+        StmtNode* Program();
 
-        ASTNode * Program_Prime();
+        StmtNode* Program_Prime(string type, string id);
 
-        ASTNode * Data_Decls_Prime();
+        StmtNode* Data_Decls_Prime(string type, string id);
 
-        ASTNode * Data_Decls_Prime_Tail();
+        vector<StmtNode*>* Func_List_Prime(string type, string id);
 
-        ASTNode * Func_List_Prime();
+        vector<StmtNode*>* Func_List();
 
-        ASTNode * Func_List();
+        StmtNode* Func();
 
-        ASTNode * Func();
+        ExprNode* Parameter_List();
 
-        ASTNode * Func_Tail();
+        vector<StmtNode*>* Data_Decls();
 
-        ASTNode * Func_Decl();
+        vector<ExprNode*>* Id_List();
 
-        ASTNode * Func_Decl_Prime();
+        ExprNode* Id();
 
-        ASTNode * Type_Name();
+        StmtNode * Block_Statements();
 
-        ASTNode * Type_Name_Prime();
+        vector<StmtNode*>* Statements();
 
-        ASTNode * Parameter_List();
+        StmtNode * Statement();
 
-        ASTNode * Parameter_List_Tail();
+        vector<ExprNode*> * Expr_List();
 
-        ASTNode * Non_Empty_List();
+        vector<ExprNode*> * Non_Empty_Expr_List();
 
-        ASTNode * Non_Empty_List_Prime();
+        StmtNode * If_Statement();
 
-        ASTNode * Data_Decls();
+        ExprNode* Condition_Expression();
 
-        ASTNode * Data_Func_Decl();
+        ExprNode * Condition();
 
-        ASTNode * Id_List();
+        StmtNode * While_Statement();
 
-        ASTNode * Id_List_Prime();
-
-        ASTNode * Id();
-
-        ASTNode * Id_Tail();
-
-        ASTNode * Block_Statements();
-
-        ASTNode * Statements();
-
-        ASTNode * Statement();
-
-        ASTNode * Statement_Tail();
-
-        ASTNode * Assignment();
-
-        ASTNode * Assignment_Tail();
-
-        ASTNode * Func_Call_Tail();
-
-        ASTNode * Expr_List();
-
-        ASTNode * Non_Empty_Expr_List();
-
-        ASTNode * Non_Empty_Expr_List_Prime();
-
-        ASTNode * If_Statement();
-
-        ASTNode * Condition_Expression();
-
-        ASTNode * Condition_Expression_Tail();
-               
-        ASTNode * Condition_Op();
-
-        ASTNode * Condition();
-
-        ASTNode * Comparison_Op();
-
-        ASTNode * While_Statement();
-
-        ASTNode * Return_Statement();
+        StmtNode * Return_Statement();
         
-        ASTNode * Return_Statement_Tail();
+        StmtNode * Return_Statement_Tail();
 
-        ASTNode * Break_Statement();
+        StmtNode * Break_Statement();
 
-        ASTNode * Continue_Statement();
+        StmtNode * Continue_Statement();
 
-        ASTNode * Expression();
+        ExprNode* Expression();
 
-        ASTNode * Expression_Prime();
+        ExprNode* Term();
 
-        ASTNode * Addop();
-
-        ASTNode * Term();
-
-        ASTNode * Term_Prime();
-
-        ASTNode * Mulop();
-
-        ASTNode * Factor();
-
-        ASTNode * Factor_Tail();
+        ExprNode * Factor();
 };
 #endif /* GRAMMAR_H */

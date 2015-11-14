@@ -38,7 +38,7 @@ class Parser {
         void AddToken(Token *new_token);
 
         // Parsing related 
-        ASTNode *Parse();
+        StmtNode *Parse();
 
 
         // Project 2 legacy code
