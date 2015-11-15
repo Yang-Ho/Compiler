@@ -1,7 +1,7 @@
 #ifndef ASTNODE_H
 #define ASTNODE_H 
 #include "label.h"
-#include "address.h"
+#include "symbol.h"
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@ extern ofstream output;
 class ExprNode{
     public:
         virtual~ExprNode() {};
-        virtual Address* genCode() = 0;
+        virtual string  genCode(SymbolTable* st) = 0;
 };
 
 class ComparisonExpr : public ExprNode {
@@ -24,7 +24,7 @@ class ComparisonExpr : public ExprNode {
     public:
         ComparisonExpr(string o, ExprNode *l, ExprNode *r);
         virtual~ComparisonExpr();
-        virtual Address* genCode();
+        virtual string  genCode(SymbolTable* st);
 };
 
 class ConditionExpr : public ExprNode {
@@ -35,7 +35,7 @@ class ConditionExpr : public ExprNode {
     public:
         ConditionExpr(string o, ExprNode* l, ExprNode*r);
         virtual~ConditionExpr();
-        virtual Address* genCode();
+        virtual string  genCode(SymbolTable* st);
 };
 
 class BinaryExpr : public ExprNode {
@@ -46,7 +46,7 @@ class BinaryExpr : public ExprNode {
     public:
         BinaryExpr(string o, ExprNode* l, ExprNode* r);
         virtual~BinaryExpr();
-        virtual Address* genCode();
+        virtual string  genCode(SymbolTable* st);
 };
 
 class UnaryExpr : public ExprNode {
@@ -56,7 +56,7 @@ class UnaryExpr : public ExprNode {
     public:
         UnaryExpr(string o, ExprNode* c);
         virtual~UnaryExpr();
-        virtual Address* genCode();
+        virtual string  genCode(SymbolTable* st);
 };
 
 class ParenExpr : public ExprNode {
@@ -65,7 +65,7 @@ class ParenExpr : public ExprNode {
     public:
         ParenExpr(ExprNode* c);
         virtual~ParenExpr();
-        virtual Address* genCode();
+        virtual string  genCode(SymbolTable* st);
 };
 
 class VariableExpr : public ExprNode {
@@ -73,7 +73,7 @@ class VariableExpr : public ExprNode {
         string name;
     public:
         VariableExpr(string n);
-        virtual Address* genCode();
+        virtual string  genCode(SymbolTable* st);
 };
 
 class NumberExpr : public ExprNode {
@@ -81,7 +81,7 @@ class NumberExpr : public ExprNode {
         string val;
     public:
         NumberExpr(string v);
-        virtual Address* genCode();
+        virtual string  genCode(SymbolTable* st);
 };
 
 class FuncCallExpr : public ExprNode {
@@ -91,7 +91,7 @@ class FuncCallExpr : public ExprNode {
     public:
         FuncCallExpr(string n, vector<ExprNode*> *a);
         virtual~FuncCallExpr();
-        virtual Address* genCode();
+        virtual string  genCode(SymbolTable* st);
 };
 
 class ArrayRefExpr : public ExprNode {
@@ -101,7 +101,7 @@ class ArrayRefExpr : public ExprNode {
     public:
         ArrayRefExpr(string n, ExprNode *i);
         virtual~ArrayRefExpr();
-        virtual Address* genCode();
+        virtual string  genCode(SymbolTable* st);
 };
 
 class ParamListExpr : public ExprNode {
@@ -110,7 +110,7 @@ class ParamListExpr : public ExprNode {
     public:
         ParamListExpr(vector<ExprNode*> *p);
         virtual~ParamListExpr();
-        virtual Address* genCode();
+        virtual string  genCode(SymbolTable* st);
 };
 
 class ParamExpr : public ExprNode {
@@ -119,13 +119,13 @@ class ParamExpr : public ExprNode {
         string name;
     public:
         ParamExpr(string t, string n);
-        virtual Address* genCode();
+        virtual string  genCode(SymbolTable* st);
 };
 
 class StmtNode{
     public:
         virtual~StmtNode() {}
-        virtual void genCode(Label& next) = 0;
+        virtual void genCode(Label& next, SymbolTable* st) = 0;
 };
 
 class ProgramStmt: public StmtNode {
@@ -135,7 +135,7 @@ class ProgramStmt: public StmtNode {
     public:
         ProgramStmt(vector<StmtNode*>* d, vector<StmtNode*>* f);
         virtual~ProgramStmt();
-        virtual void genCode(Label& next);
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 
 class FuncDeclStmt: public StmtNode {
@@ -148,7 +148,7 @@ class FuncDeclStmt: public StmtNode {
     public:
         FuncDeclStmt(string t, string n, ExprNode *p, vector<StmtNode*>* dd, vector<StmtNode*>* b);
         virtual~FuncDeclStmt();
-        virtual void genCode(Label& next);
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 
 class DataDeclsStmt: public StmtNode {
@@ -158,7 +158,7 @@ class DataDeclsStmt: public StmtNode {
     public:
         DataDeclsStmt(string t, vector<ExprNode*>*i);
         virtual~DataDeclsStmt();
-        virtual void genCode(Label& next);
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 
 class BlockStmt: public StmtNode {
@@ -167,8 +167,7 @@ class BlockStmt: public StmtNode {
     public:
         BlockStmt(vector<StmtNode*>*s);
         virtual~BlockStmt();
-        virtual void genCode(Label& next);
-        virtual void genCode(Label& yes, Label& no); 
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 
 class FuncCallStmt: public StmtNode{
@@ -178,7 +177,7 @@ class FuncCallStmt: public StmtNode{
     public:
         FuncCallStmt(string n, vector<ExprNode*> *a);
         virtual~FuncCallStmt();
-        virtual void genCode(Label& next);
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 
 class AssignmentStmt: public StmtNode {
@@ -188,7 +187,7 @@ class AssignmentStmt: public StmtNode {
     public:
         AssignmentStmt(ExprNode *l, ExprNode *r);
         virtual~AssignmentStmt();
-        virtual void genCode(Label& next);
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 
 class IfStmt : public StmtNode {
@@ -198,7 +197,7 @@ class IfStmt : public StmtNode {
     public:
         IfStmt(ExprNode *c, StmtNode *b);
         virtual~IfStmt();
-        virtual void genCode(Label& next);
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 
 class WhileStmt : public StmtNode {
@@ -208,7 +207,7 @@ class WhileStmt : public StmtNode {
     public:
         WhileStmt(ExprNode *c, StmtNode *b);
         virtual~WhileStmt();
-        virtual void genCode(Label& next);
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 
 class ReturnStmt : public StmtNode {
@@ -217,19 +216,19 @@ class ReturnStmt : public StmtNode {
     public:
         ReturnStmt(ExprNode* e);
         virtual~ReturnStmt();
-        virtual void genCode(Label& next);
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 
 class BreakStmt : public StmtNode {
     private:
     public:
-        virtual void genCode(Label& no);
+        virtual void genCode(Label& no, SymbolTable* st);
 };
 
 class ContinueStmt : public StmtNode {
     private:
     public:
-        virtual void genCode(Label& yes);
+        virtual void genCode(Label& yes, SymbolTable* st);
 };
 
 class ReadStmt : public StmtNode {
@@ -237,7 +236,7 @@ class ReadStmt : public StmtNode {
         string name;
     public:
         ReadStmt(string n);
-        virtual void genCode(Label& next);
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 
 class WriteStmt : public StmtNode {
@@ -246,7 +245,7 @@ class WriteStmt : public StmtNode {
     public:
         WriteStmt(ExprNode* e);
         virtual~WriteStmt();
-        virtual void genCode(Label& next);
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 
 class PrintStmt : public StmtNode {
@@ -254,6 +253,6 @@ class PrintStmt : public StmtNode {
         string val;
     public:
         PrintStmt(string v);
-        virtual void genCode(Label& next);
+        virtual void genCode(Label& next, SymbolTable* st);
 };
 #endif /* ASTNODE_H */

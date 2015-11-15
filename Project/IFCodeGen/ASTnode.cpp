@@ -1,4 +1,6 @@
 #include "ASTnode.h"
+#include "label.h"
+#include "symbol.h"
 
 #include <string>
 #include <vector>
@@ -16,13 +18,13 @@ ComparisonExpr::~ComparisonExpr() {
     delete right;
 }
 
-Address* ComparisonExpr::genCode() {
+string ComparisonExpr::genCode(SymbolTable* st) {
     cout<<"Generating code: ComparisonExpr\n";
-    Address* resultl = left->genCode();
-    Address* resultr = right->genCode();
+    string resultl = left->genCode(st);
+    string resultr = right->genCode(st);
 
-    Address* result = new TempAddress();
-    output<<result->str()<<"="<<resultl->str()<<op<<resultr->str()<<";\n";
+    string result = st->GetAddress();
+    output<<result<<"="<<resultl<<op<<resultr<<";\n";
     return result;
 }
 
@@ -35,13 +37,13 @@ ConditionExpr::~ConditionExpr() {
     delete right;
 }
 
-Address* ConditionExpr::genCode() {
+string ConditionExpr::genCode(SymbolTable* st) {
     cout<<"Generating code: ConditionExpr\n";
-    Address* resultl = left->genCode();
-    Address* resultr = right->genCode();
+    string resultl = left->genCode(st);
+    string resultr = right->genCode(st);
 
-    Address* result = new TempAddress();
-    output<<result->str()<<"="<<resultl->str()<<op<<resultr->str()<<";\n";
+    string result = st->GetAddress();
+    output<<result<<"="<<resultl<<op<<resultr<<";\n";
     return result;
 }
 
@@ -54,13 +56,13 @@ BinaryExpr::~BinaryExpr() {
     delete right;
 }
 
-Address* BinaryExpr::genCode() {
+string BinaryExpr::genCode(SymbolTable* st) {
     cout<<"Generating code: BinaryExpr\n";
-    Address* resultl = left->genCode();
-    Address* resultr = right->genCode();
+    string resultl = left->genCode(st);
+    string resultr = right->genCode(st);
 
-    Address* result = new TempAddress();
-    output<<result->str()<<"="<<resultl->str()<<op<<resultr->str()<<";\n";
+    string result = st->GetAddress();
+    output<<result<<"="<<resultl<<op<<resultr<<";\n";
     return result;
 }
 
@@ -72,12 +74,12 @@ UnaryExpr::~UnaryExpr() {
     delete child;
 }
 
-Address* UnaryExpr::genCode() {
+string UnaryExpr::genCode(SymbolTable* st) {
     cout<<"Generating code: UnaryExpr\n";
-    Address* resultc = child->genCode();
-    Address* result = new TempAddress();
+    string resultc = child->genCode(st);
+    string result = st->GetAddress();
 
-    output<<result->str()<<"="<<op<<resultc->str()<<";\n";
+    output<<result<<"="<<op<<resultc<<";\n";
     return result;
 }
 
@@ -89,12 +91,12 @@ ParenExpr::~ParenExpr() {
     delete child;
 }
 
-Address* ParenExpr::genCode() {
+string ParenExpr::genCode(SymbolTable* st) {
     cout<<"Generating code: ParenExpr\n";
-    Address* resultc = child->genCode();
-    Address* result = new TempAddress();
+    string resultc = child->genCode(st);
+    string result = st->GetAddress();
 
-    output<<result->str()<<"="<<"("<<resultc->str()<<");\n";
+    output<<result<<"="<<"("<<resultc<<");\n";
     return result;
 }
 
@@ -102,10 +104,14 @@ Address* ParenExpr::genCode() {
 VariableExpr::VariableExpr(string n)
     :name(n) {}
 
-Address* VariableExpr::genCode() {
+string VariableExpr::genCode(SymbolTable* st) {
     cout<<"Generating code: VariableExpr\n";
-    Address* result = new VarAddress(name);
-
+    if (st->LookUp(name)) {
+    } else {
+        Symbol* sym = new Symbol(name, SYMBOL_LOCAL, 0);
+        st->Insert(sym);
+    }
+    string result = st->GetAddress(name);
     return result;
 }
 
@@ -113,11 +119,11 @@ Address* VariableExpr::genCode() {
 NumberExpr::NumberExpr(string v)
     :val(v) {}
 
-Address* NumberExpr::genCode() {
+string NumberExpr::genCode(SymbolTable* st) {
     cout<<"Generating code: NumberExpr\n";
-    Address* result = new TempAddress();
+    string result = st->GetAddress();
 
-    output<<result->str()<<"="<<val<<";\n";
+    output<<result<<"="<<val<<";\n";
     return result;
 }
 
@@ -133,19 +139,19 @@ FuncCallExpr::~FuncCallExpr() {
     delete args;
 }
 
-Address* FuncCallExpr::genCode() {
+string FuncCallExpr::genCode(SymbolTable* st) {
     cout<<"Generating code: FuncCallExpr\n";
-    Address* result = new TempAddress();
+    string result = st->GetAddress();
 
-    output<<result->str()<<"="<<name<<"(";
+    output<<result<<"="<<name<<"(";
     if (args) {
         vector<ExprNode*>::iterator it;
         for (it = args->begin(); it != args->end(); ++it) {
             if (*it) {
-                Address* r = (*it)->genCode();
-                cout<<r->str();
+                string r = (*it)->genCode(st);
+                output<<r;
                 if (it + 1 != args->end()) {
-                    cout<<", ";
+                    output<<", ";
                 }
             }
         }
@@ -162,12 +168,12 @@ ArrayRefExpr::~ArrayRefExpr() {
     delete index;
 }
 
-Address* ArrayRefExpr::genCode() {
+string ArrayRefExpr::genCode(SymbolTable* st) {
     output<<"Generating code: ArrayRefExpr\n";
-    Address* resulti = index->genCode();
-    Address* result = new TempAddress();
+    string resulti = index->genCode(st);
+    string result = st->GetAddress();
 
-    output<<result->str()<<"="<<name<<"["<<resulti->str()<<"];\n";
+    output<<result<<"="<<name<<"["<<resulti<<"];\n";
 
     return result;
 }
@@ -183,23 +189,30 @@ ParamListExpr::~ParamListExpr() {
     delete params;
 }
 
-Address* ParamListExpr::genCode() {
+string ParamListExpr::genCode(SymbolTable* st) {
     cout<<"Generating code: ParamListExpr\n";
     vector<ExprNode*>::iterator pit;
     for (pit = params->begin(); pit != params->end(); pit++) {
-        (*pit)->genCode();
+        (*pit)->genCode(st);
     }
-    return new TempAddress();
+    return "";
 }
 
 // @ParamExpr
 ParamExpr::ParamExpr(string t, string n)
     :type(t), name(n) {}
 
-Address* ParamExpr::genCode() {
+string ParamExpr::genCode(SymbolTable* st) {
     cout<<"Generating code: ParamExpr\n";
-    Address* result = new VarAddress(name, VAR_PARAM);
-    output<<type<<" "<<name;
+    string result = "";
+    if (name != "") {
+        Symbol * sym = new Symbol(name, SYMBOL_PARAM, 0);
+        st->Insert(sym);
+        result = st->GetAddress(name);
+        output<<type<<" "<<name;
+    } else {
+        output<<type;
+    }
     return result;
 }
 
@@ -220,18 +233,20 @@ ProgramStmt::~ProgramStmt() {
     delete func_decls;
 }
 
-void ProgramStmt::genCode(Label& next) {
+void ProgramStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: ProgramStmt\n";
     vector<StmtNode*>::iterator ddit;
     vector<StmtNode*>::iterator fdit;
+    st->EnterScope();
     if (data_decls) {
         for (ddit = data_decls->begin(); ddit != data_decls->end(); ++ddit) {
-            (*ddit)->genCode(next);
+            (*ddit)->genCode(next, st);
         }
     }
     for (fdit = func_decls->begin(); fdit != func_decls->end(); ++fdit) {
-        (*fdit)->genCode(next);
+        (*fdit)->genCode(next, st);
     }
+    st->ExitScope();
 }
 
 // @FuncDeclStmt
@@ -252,20 +267,21 @@ FuncDeclStmt::~FuncDeclStmt() {
     delete body;
 }
 
-void FuncDeclStmt::genCode(Label& next) {
+void FuncDeclStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: FuncDeclStmt\n";
     output<<type<<" "<<name<<"(";
     if (params) {
-        params->genCode();
+        params->genCode(st);
     }
     output<<")";
-    Address* temp = new TempAddress(true);
+    st->ResetTemp();
+    st->EnterScope();
     if (data_decls) {
         output<<"{\n";
         vector<StmtNode*>::iterator ddit;
         for (ddit = data_decls->begin(); ddit != data_decls->end(); ddit++) {
             if (*ddit)
-                (*ddit)->genCode(next);
+                (*ddit)->genCode(next, st);
         }
         if (body) {
             if (data_decls->empty()) {
@@ -274,13 +290,15 @@ void FuncDeclStmt::genCode(Label& next) {
             vector<StmtNode*>::iterator bit;
             for (bit = body->begin(); bit != body->end(); bit++) {
                 if (*bit)
-                    (*bit)->genCode(next);
+                    (*bit)->genCode(next, st);
             }
         }
         output<<"}";
+    } else {
+        output<<";";
     }
-    output<<";\n";
-    delete temp;
+    output<<"\n";
+    st->ExitScope();
 }
 
 // @DataDeclsStmt
@@ -295,7 +313,7 @@ DataDeclsStmt::~DataDeclsStmt() {
     delete ids;
 }
 
-void DataDeclsStmt::genCode(Label& next) {
+void DataDeclsStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: DataDeclsStmt\n";
     if (ids) {// To do, figure out how many local vars are in a function
         output<<type<<" local["<<ids->size()<<"];\n";
@@ -313,22 +331,12 @@ BlockStmt::~BlockStmt() {
     delete statements;
 }
 
-void BlockStmt::genCode(Label& next) {
+void BlockStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: BlockStmt\n";
     if (statements) {
         vector<StmtNode*>::iterator it;
         for (it = statements->begin(); it != statements->end(); ++it) {
-            (*it)->genCode(next);
-        }
-    }
-}
-
-void BlockStmt::genCode(Label& yes, Label& no) {
-    cout<<"Block statment inside while loop\n";
-    if (statements) {
-        vector<StmtNode*>::iterator it;
-        for (it = statements->begin(); it != statements->end(); ++it) {
-            (*it)->genCode(yes);
+            (*it)->genCode(next, st);
         }
     }
 }
@@ -345,17 +353,17 @@ FuncCallStmt::~FuncCallStmt() {
     delete args;
 }
 
-void FuncCallStmt::genCode(Label& next) {
+void FuncCallStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: FuncCallStmt\n";
     output<<name<<"(";
     if (args) {
         vector<ExprNode*>::iterator it;
         for (it = args->begin(); it != args->end(); ++it) {
-            if (*it) {
-                Address* r = (*it)->genCode();
-                cout<<r->str();
+            if ((*it)) {
+                string r = (*it)->genCode(st);
+                output<<r;
                 if (it + 1 != args->end()) {
-                    cout<<", ";
+                    output<<", ";
                 }
             }
         }
@@ -371,12 +379,12 @@ AssignmentStmt::~AssignmentStmt() {
     delete rhs;
 }
 
-void AssignmentStmt::genCode(Label& next) {
+void AssignmentStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: AssignmentStmt\n";
-    Address* resultl = lhs->genCode();
-    Address* resultr = rhs->genCode();
+    string resultl = lhs->genCode(st);
+    string resultr = rhs->genCode(st);
 
-    output<<resultl->str()<<"="<<resultr->str()<<";\n";
+    output<<resultl<<"="<<resultr<<";\n";
 }
 // @IfStmt
 IfStmt::IfStmt(ExprNode *c, StmtNode *b)
@@ -387,15 +395,16 @@ IfStmt::~IfStmt() {
     delete body;
 }
 
-void IfStmt::genCode(Label& next) {
+void IfStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: IfStmt\n";
+    Label trueLabel;
     Label falseLabel;
-    Address* result = condition->genCode();
-    output<<"if ("<<result->str()<<") goto "<<next.str()<<";\n";  
+    string result = condition->genCode(st);
+    output<<"if ("<<result<<") goto "<<trueLabel.str()<<";\n";  
     output<<"goto "<<falseLabel.str()<<";\n";
-    output<<next.str()<<":\n";
-    body->genCode(falseLabel);
-    output<<falseLabel.str()<<":\n";
+    output<<trueLabel.str()<<":;\n";
+    body->genCode(falseLabel, st);
+    output<<falseLabel.str()<<":;\n";
 }
 // @WhileStmt
 WhileStmt::WhileStmt(ExprNode *c, StmtNode *b)
@@ -406,19 +415,21 @@ WhileStmt::~WhileStmt() {
     delete body;
 }
 
-void WhileStmt::genCode(Label& next) {
+void WhileStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: WhileStmt\n";
     Label trueLabel;
     Label falseLabel;
-    Address* result = condition->genCode();
-    output<<next.str()<<":\n";
-    output<<"if ("<<result->str()<<") goto "<<trueLabel.str()<<";\n";
+    st->EnterWhile(next, falseLabel);
+    string result = condition->genCode(st);
+    output<<next.str()<<":;\n";
+    output<<"if ("<<result<<") goto "<<trueLabel.str()<<";\n";
     output<<"goto "<<falseLabel.str()<<";\n";
-    output<<trueLabel.str()<<":\n";
+    output<<trueLabel.str()<<":;\n";
     //body->genCode(trueLabel, falseLabel);
-    body->genCode(trueLabel);
+    body->genCode(falseLabel, st);
     output<<"goto "<<next.str()<<";\n";
-    output<<falseLabel.str()<<":\n";
+    output<<falseLabel.str()<<":;\n";
+    st->ExitWhile();
 }
 
 // @ReturnStmt
@@ -429,35 +440,41 @@ ReturnStmt::~ReturnStmt() {
     delete expr;
 }
 
-void ReturnStmt::genCode(Label& next) {
+void ReturnStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: ReturnStmt\n";
     if (expr) {
-        Address * result = expr->genCode();
-        output<<"return "<<result->str()<<";\n";
+        string result = expr->genCode(st);
+        output<<"return "<<result<<";\n";
     } else {
         output<<"return ;\n";
     }
 }
 
 // @BreakStmt
-void BreakStmt::genCode(Label& no) {
+void BreakStmt::genCode(Label& no, SymbolTable* st) {
     cout<<"Generating code: BreakStmt\n";
-    output<<"goto "<<no.str()<<";\n";
+    output<<"goto "<<st->GetFalseLabel().str()<<";\n";
 }
 
 // @ContinueStmt
-void ContinueStmt::genCode(Label& yes) {
+void ContinueStmt::genCode(Label& yes, SymbolTable* st) {
     cout<<"Generating code: ContinueStmt\n";
-    output<<"goto "<<yes.str()<<";\n";
+    output<<"goto "<<st->GetTrueLabel().str()<<";\n";
 }
 
 // @ReadStmt
 ReadStmt::ReadStmt(string n)
     :name(n) {}
 
-void ReadStmt::genCode(Label& next) {
+void ReadStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: ReadStmt\n";
-    output<<"read("<<name<<");\n";
+    if (st->LookUp(name)) {
+    } else {
+        Symbol* sym = new Symbol(name, SYMBOL_LOCAL, 0);
+        st->Insert(sym);
+    }
+    string result = st->GetAddress(name);
+    output<<"read("<<result<<");\n";
 }
 
 // @WriteStmt
@@ -468,17 +485,17 @@ WriteStmt::~WriteStmt() {
     delete expr;
 }
 
-void WriteStmt::genCode(Label& next) {
+void WriteStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: WriteStmt\n";
-    Address* result = expr->genCode();
-    output<<"write("<<result->str()<<");\n";
+    string result = expr->genCode(st);
+    output<<"write("<<result<<");\n";
 }
 
 // @PrintStmt
 PrintStmt::PrintStmt(string v)
     : val(v) {}
 
-void PrintStmt::genCode(Label& next) {
+void PrintStmt::genCode(Label& next, SymbolTable* st) {
     cout<<"Generating code: PrintStmt\n";
     output<<"print("<<val<<");\n";
 }

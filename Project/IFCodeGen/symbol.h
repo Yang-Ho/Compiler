@@ -1,6 +1,8 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+#include "label.h"
+
 #include <vector>
 #include <map>
 #include <string>
@@ -25,18 +27,38 @@ class Symbol {
         string GetName();
         SymbolType GetType();
         int GetLoc();
+        void SetLoc(int l);
+        void SetType(SymbolType t);
 };
 
 class SymbolTable {
     private:
-        map<string, Symbol*> symbols;
-        SymbolTable * parent;
+        vector<map<string, Symbol*> > symbols;
+
+        vector<pair<Label, Label> > while_scopes;
+
+        int next_temp;
+        int curr_temp;
     public:
-        SymbolTable(SymbolTable* p = 0);
+        SymbolTable();
         ~SymbolTable();
 
         Symbol* LookUp(string name);
         void Insert(Symbol *sym);
+
+        void ResetTemp();
+
+        string GetAddress();
+        string GetAddress(string name);
+
+        void EnterScope();
+        void ExitScope();
+
+        void EnterWhile(Label& t, Label&f);
+        void ExitWhile();
+
+        Label& GetTrueLabel();
+        Label& GetFalseLabel();
 };
 
 #endif /* SYMBOL_H */

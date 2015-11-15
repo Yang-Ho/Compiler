@@ -8,9 +8,9 @@
 #include "grammar.h"
 #include "scanner.h"
 #include "token.h"
-#include "address.h"
 #include "label.h"
 #include "ASTnode.h"
+#include "symbol.h"
 
 #include <iostream>
 #include <fstream>
@@ -52,7 +52,8 @@ int main(int argc, char* argv[]) {
         cout<<"Successfully parsed the program!\n";
         Label l;
         cout<<"Generating code...\n";
-        ast_tree->genCode(l);
+        SymbolTable* symtab = new SymbolTable(); 
+        ast_tree->genCode(l, symtab);
         cout<<"Done generating code\n";
         cout<<"Output file: "<<output_file<<"\n";
     } else {

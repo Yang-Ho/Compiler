@@ -290,6 +290,8 @@ ExprNode* Grammar::Parameter_List() {
                     }
                 }
             }
+        } else {
+            param_list->push_back(new ParamExpr("void", ""));
         }
     } else {
         string id = "";
