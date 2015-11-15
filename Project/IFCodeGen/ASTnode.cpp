@@ -104,9 +104,8 @@ VariableExpr::VariableExpr(string n)
 
 Address* VariableExpr::genCode() {
     cout<<"Generating code: VariableExpr\n";
-    Address* result = new TempAddress();
+    Address* result = new VarAddress(name);
 
-    output<<result->str()<<"="<<name<<";\n";
     return result;
 }
 
@@ -139,7 +138,19 @@ Address* FuncCallExpr::genCode() {
     Address* result = new TempAddress();
 
     output<<result->str()<<"="<<name<<"(";
-    output<<"TO DO, func call param"<<");\n";
+    if (args) {
+        vector<ExprNode*>::iterator it;
+        for (it = args->begin(); it != args->end(); ++it) {
+            if (*it) {
+                Address* r = (*it)->genCode();
+                cout<<r->str();
+                if (it + 1 != args->end()) {
+                    cout<<", ";
+                }
+            }
+        }
+    }
+    output<<");\n";
     return result;
 }
 
@@ -187,7 +198,7 @@ ParamExpr::ParamExpr(string t, string n)
 
 Address* ParamExpr::genCode() {
     cout<<"Generating code: ParamExpr\n";
-    Address* result = new TempAddress();
+    Address* result = new VarAddress(name, VAR_PARAM);
     output<<type<<" "<<name;
     return result;
 }
@@ -248,6 +259,7 @@ void FuncDeclStmt::genCode(Label& next) {
         params->genCode();
     }
     output<<")";
+    Address* temp = new TempAddress(true);
     if (data_decls) {
         output<<"{\n";
         vector<StmtNode*>::iterator ddit;
@@ -256,6 +268,9 @@ void FuncDeclStmt::genCode(Label& next) {
                 (*ddit)->genCode(next);
         }
         if (body) {
+            if (data_decls->empty()) {
+                output<<type<<" "<<"local["<<5<<"];\n";
+            }
             vector<StmtNode*>::iterator bit;
             for (bit = body->begin(); bit != body->end(); bit++) {
                 if (*bit)
@@ -265,6 +280,7 @@ void FuncDeclStmt::genCode(Label& next) {
         output<<"}";
     }
     output<<";\n";
+    delete temp;
 }
 
 // @DataDeclsStmt
@@ -281,7 +297,9 @@ DataDeclsStmt::~DataDeclsStmt() {
 
 void DataDeclsStmt::genCode(Label& next) {
     cout<<"Generating code: DataDeclsStmt\n";
-    output<<type<<" TO DO DATA DECLS\n";
+    if (ids) {// To do, figure out how many local vars are in a function
+        output<<type<<" local["<<ids->size()<<"];\n";
+    }
 }
 // @BlockStmt
 BlockStmt::BlockStmt(vector<StmtNode*> *s)
@@ -329,7 +347,20 @@ FuncCallStmt::~FuncCallStmt() {
 
 void FuncCallStmt::genCode(Label& next) {
     cout<<"Generating code: FuncCallStmt\n";
-    output<<"To do func call stmt\n";
+    output<<name<<"(";
+    if (args) {
+        vector<ExprNode*>::iterator it;
+        for (it = args->begin(); it != args->end(); ++it) {
+            if (*it) {
+                Address* r = (*it)->genCode();
+                cout<<r->str();
+                if (it + 1 != args->end()) {
+                    cout<<", ";
+                }
+            }
+        }
+    }
+    output<<");\n";
 }
 // @AssignmentStmt
 AssignmentStmt::AssignmentStmt(ExprNode* l, ExprNode* r)
@@ -402,7 +433,7 @@ void ReturnStmt::genCode(Label& next) {
     cout<<"Generating code: ReturnStmt\n";
     if (expr) {
         Address * result = expr->genCode();
-        output<<"return "<<result<<";\n";
+        output<<"return "<<result->str()<<";\n";
     } else {
         output<<"return ;\n";
     }

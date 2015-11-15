@@ -5,17 +5,25 @@
 
 using namespace::std;
 
-VarAddress::VarAddress(string n)
-    : name(n) {}
+VarAddress::VarAddress(string n, VarType t)
+    : name(n), type(t) {}
 
 string VarAddress::str() {
-    return name;
+    if (type == VAR_PARAM) {
+        return name;
+    } else {
+        return name;
+    }
 }
 
-int TempAddress::next = 0;
+int TempAddress::next = -1;
 
-TempAddress::TempAddress()
-    :value(next++) {}
+TempAddress::TempAddress(bool r)
+    : value(next++){
+    if (r) {
+        next = 0;
+    }
+}
 
 string TempAddress::str() {
     stringstream ss;

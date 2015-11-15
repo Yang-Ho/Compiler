@@ -7,21 +7,36 @@
 
 using namespace::std;
 
+typedef enum{
+    SYMBOL_LOCAL = 1,
+    SYMBOL_GLOBAL,
+    SYMBOL_PARAM,
+    SYMBOL_FUNC
+} SymbolType;
+
+class Symbol {
+    private:
+        string name;
+        SymbolType type;
+        int loc;
+    public:
+        Symbol(string n, SymbolType t, int l);
+        
+        string GetName();
+        SymbolType GetType();
+        int GetLoc();
+};
+
 class SymbolTable {
     private:
-        int count;
-        map<string, int> symbols;
+        map<string, Symbol*> symbols;
+        SymbolTable * parent;
     public:
-        SymbolTable();
+        SymbolTable(SymbolTable* p = 0);
         ~SymbolTable();
 
-        int LookUp(string name);
-        void Insert(string name);
-
-        void OpenScope();
-        void CloseScope();
-
-        int CurrentScope();
+        Symbol* LookUp(string name);
+        void Insert(Symbol *sym);
 };
 
 #endif /* SYMBOL_H */
