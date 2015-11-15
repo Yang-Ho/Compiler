@@ -8,15 +8,18 @@
 #include "grammar.h"
 #include "scanner.h"
 #include "token.h"
+#include "address.h"
+#include "label.h"
+#include "ASTnode.h"
 
 #include <iostream>
 #include <fstream>
 #include <cstdio>
 #include <vector>
-#include <exception>
 
 using namespace::std;
 
+ofstream output;
 int main(int argc, char* argv[]) {
     // Check command line input 
     if (argc < 2) {
@@ -29,8 +32,12 @@ int main(int argc, char* argv[]) {
 
     Scanner scanner(argv[1]);
     Grammar *grammar = new Grammar();
-    Generator *generator = new Generator(argv[1]);
-    Parser parser(grammar, generator);
+    Parser parser(grammar);
+
+    string fileName = argv[1];
+    string output_file = fileName.substr(0, fileName.rfind('.'));
+    output_file += "_gen.c";
+    output.open(output_file.c_str());
     while (scanner.HasMoreTokens()) {
         Token* t = scanner.GetNextToken();
         if (t->GetTokenType() == TOKEN_ERROR) {
@@ -42,18 +49,18 @@ int main(int argc, char* argv[]) {
     }
     StmtNode * ast_tree = parser.Parse();
     if (ast_tree) {
-        //cout<<"Pass variable "<<parser.GetNumVariables()<<" functions "<<parser.GetNumFunctions()<<" statement "<<parser.GetNumStatements()<<endl;
         cout<<"Successfully parsed the program!\n";
-        //cout<<"Output file: "<<parser.GetOutputFileName()<<"\n";
-        //cout<<"emitting code\n";
-        //generator->Emit(ast_tree);
-        //cout<<"Done emitting code\n";
+        Label l;
+        cout<<"Generating code...\n";
+        ast_tree->genCode(l);
+        cout<<"Done generating code\n";
+        cout<<"Output file: "<<output_file<<"\n";
     } else {
         cout<<"Falied to parse\n";
     }
-    delete grammar;
-    delete ast_tree;
-    delete generator;
-    
+    //delete grammar;
+    //delete ast_tree;
+   
+    output.close(); 
     return 0;
 }

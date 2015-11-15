@@ -5,21 +5,19 @@
 #include "token.h"
 #include "symbol.h"
 #include "ASTnode.h"
-#include "generator.h"
 
 #include <vector>
 #include <iostream>
 
 using namespace::std;
 
-Parser::Parser(Grammar *new_grammar, Generator *gen) {
+Parser::Parser(Grammar *new_grammar) {
     grammar = new_grammar;
     num_variables = 0;
     num_functions = 0;
     num_statements = 0;
     tokens = new vector<Token *>();
     grammar->LoadParser(this);
-    generator = gen;
 }
 
 Parser::~Parser() {
@@ -35,7 +33,8 @@ Token* Parser::Consume(TokenType t_type) {
     ++tokenIT;
     while (tokenIT != tokens->end() && (*tokenIT)->GetTokenType() == TOKEN_META) {
         if ((*tokenIT)->GetTokenType() == TOKEN_META) {
-            generator->WriteToOutput((*tokenIT)->GetTokenValue());
+            //generator->WriteToOutput((*tokenIT)->GetTokenValue());
+            output<<(*tokenIT)->GetTokenValue();
         }
         ++tokenIT;
     }
@@ -70,7 +69,8 @@ StmtNode *Parser::Parse() {
     tokenIT = tokens->begin();
     while (tokenIT != tokens->end() && (*tokenIT)->GetTokenType() == TOKEN_META) {
         if ((*tokenIT)->GetTokenType() == TOKEN_META) {
-            generator->WriteToOutput((*tokenIT)->GetTokenValue());
+            //generator->WriteToOutput((*tokenIT)->GetTokenValue());
+            output<<(*tokenIT)->GetTokenValue();
         }
         ++tokenIT;
     }
@@ -82,7 +82,7 @@ StmtNode *Parser::Parse() {
             return  NULL;
         }
     }
-    return new StmtNode();
+    return NULL;
 }
 
 

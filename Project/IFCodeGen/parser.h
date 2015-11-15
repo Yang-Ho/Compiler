@@ -4,7 +4,6 @@
 #include "token.h"
 #include "grammar.h"
 #include "ASTnode.h"
-#include "generator.h"
 
 #include <vector>
 #include <fstream>
@@ -20,14 +19,13 @@ class Parser {
         vector<Token *>::iterator tokenIT;  // The current token
         
         Grammar* grammar;                   // The grammar used
-        Generator* generator;
 
         int num_variables;
         int num_functions;
         int num_statements;
     public:
         // Constructor and deconstructor
-        Parser(Grammar *new_grammar, Generator* gen);
+        Parser(Grammar *new_grammar);
         ~Parser();
 
         // Token related
