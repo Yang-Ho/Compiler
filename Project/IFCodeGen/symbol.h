@@ -37,8 +37,7 @@ class SymbolTable {
 
         vector<pair<Label, Label> > while_scopes;
 
-        int next_temp;
-        int curr_temp;
+        static int next_temp;
     public:
         SymbolTable();
         ~SymbolTable();

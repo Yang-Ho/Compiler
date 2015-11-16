@@ -124,6 +124,7 @@ string NumberExpr::genCode(SymbolTable* st) {
     string result = st->GetAddress();
 
     output<<result<<"="<<val<<";\n";
+    //string result = val;
     return result;
 }
 
@@ -274,9 +275,9 @@ void FuncDeclStmt::genCode(Label& next, SymbolTable* st) {
         params->genCode(st);
     }
     output<<")";
-    st->ResetTemp();
-    st->EnterScope();
     if (data_decls) {
+        st->ResetTemp();
+        st->EnterScope();
         output<<"{\n";
         vector<StmtNode*>::iterator ddit;
         for (ddit = data_decls->begin(); ddit != data_decls->end(); ddit++) {
@@ -294,11 +295,11 @@ void FuncDeclStmt::genCode(Label& next, SymbolTable* st) {
             }
         }
         output<<"}";
+        st->ExitScope();
     } else {
         output<<";";
     }
     output<<"\n";
-    st->ExitScope();
 }
 
 // @DataDeclsStmt

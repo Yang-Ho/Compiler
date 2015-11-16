@@ -31,10 +31,10 @@ void Symbol::SetType(SymbolType t) {
     type = t;
 }
 
+int SymbolTable::next_temp = 0;
+
 SymbolTable::SymbolTable() {
     symbols = vector<map<string, Symbol*> >();
-    next_temp = 0;
-    curr_temp = next_temp++;
     while_scopes = vector<pair<Label, Label> >();
 }
 
@@ -50,7 +50,6 @@ SymbolTable::~SymbolTable() {
 
 void SymbolTable::Insert(Symbol *sym) {
     sym->SetLoc(next_temp++);
-    curr_temp = next_temp;
     if (symbols.size() == 1) {
         sym->SetType(SYMBOL_GLOBAL);
     }
@@ -62,7 +61,6 @@ Symbol* SymbolTable::LookUp(string name) {
     for (vit = symbols.rbegin(); vit != symbols.rend(); ++vit) {
         map<string, Symbol*>::iterator mit = vit->find(name);
         if (mit != vit->end()) {
-            cout<<"Found it!\n";
             return mit->second;
         }
     }
@@ -75,13 +73,11 @@ void SymbolTable::ResetTemp() {
 
 string SymbolTable::GetAddress() {
     stringstream ss;
-    ss<<"local["<<curr_temp<<"]";
-    curr_temp = next_temp++;
+    ss<<"local["<<next_temp++<<"]";
     return ss.str();
 }
 
 string SymbolTable::GetAddress(string name) {
-    cout<<"Getting address for: "<<name<<endl;
     Symbol* sym = LookUp(name);
     if (sym) {
         if (sym->GetType() == SYMBOL_PARAM) {
