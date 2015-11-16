@@ -34,8 +34,9 @@ int fib(int val)
 
 int main(void)
 {
-    int idx, bound;
+    int idx, bound, test[3];
     bound = 16;
+    test[2] = 0;
 
     initialize_array();
     

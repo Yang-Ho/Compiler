@@ -13,7 +13,7 @@ typedef enum{
     SYMBOL_LOCAL = 1,
     SYMBOL_GLOBAL,
     SYMBOL_PARAM,
-    SYMBOL_FUNC
+    SYMBOL_FUNC,
 } SymbolType;
 
 class Symbol {
@@ -21,12 +21,14 @@ class Symbol {
         string name;
         SymbolType type;
         int loc;
+        int offset;
     public:
-        Symbol(string n, SymbolType t, int l);
+        Symbol(string n, SymbolType t, int o=0);
         
         string GetName();
         SymbolType GetType();
         int GetLoc();
+        int GetOffset();
         void SetLoc(int l);
         void SetType(SymbolType t);
 };
@@ -37,6 +39,7 @@ class SymbolTable {
 
         vector<pair<Label, Label> > while_scopes;
 
+        int next_global;
         static int next_temp;
     public:
         SymbolTable();
@@ -48,7 +51,10 @@ class SymbolTable {
         void ResetTemp();
 
         string GetAddress();
-        string GetAddress(string name);
+        string GetAddress(string name, string off="");
+
+        int GetTempCount();
+        int GetGlobalCount();
 
         void EnterScope();
         void ExitScope();

@@ -5,4 +5,4 @@ filenames.txt
 
 Project/Scanner/*
 Project/Parser/*
-Project/tests/*
+Project/tests/*.c

@@ -8,8 +8,10 @@
 
 using namespace::std;
 
-Symbol::Symbol(string n, SymbolType t, int l)
-    :name(n), type(t), loc(l) {}
+Symbol::Symbol(string n, SymbolType t, int o)
+    :name(n), type(t), offset(o) {
+    loc = 0;
+}
 
 string Symbol::GetName() {
     return name;
@@ -23,6 +25,10 @@ int Symbol::GetLoc() {
     return loc;
 }
 
+int Symbol::GetOffset() {
+    return offset;
+}
+
 void Symbol::SetLoc(int l) {
     loc = l;
 }
@@ -34,6 +40,7 @@ void Symbol::SetType(SymbolType t) {
 int SymbolTable::next_temp = 0;
 
 SymbolTable::SymbolTable() {
+    next_global = 0;
     symbols = vector<map<string, Symbol*> >();
     while_scopes = vector<pair<Label, Label> >();
 }
@@ -49,9 +56,15 @@ SymbolTable::~SymbolTable() {
 }
 
 void SymbolTable::Insert(Symbol *sym) {
-    sym->SetLoc(next_temp++);
-    if (symbols.size() == 1) {
+    if (symbols.size() == 1 && sym->GetType() == SYMBOL_LOCAL) {
         sym->SetType(SYMBOL_GLOBAL);
+        sym->SetLoc(next_global);
+        next_global++;
+        next_global += sym->GetOffset();
+    } else if (sym->GetType() == SYMBOL_LOCAL) {
+        sym->SetLoc(next_temp);
+        next_temp++;
+        next_temp += sym->GetOffset();
     }
     symbols.back()[sym->GetName()] = sym;
 }
@@ -77,7 +90,7 @@ string SymbolTable::GetAddress() {
     return ss.str();
 }
 
-string SymbolTable::GetAddress(string name) {
+string SymbolTable::GetAddress(string name, string off) {
     Symbol* sym = LookUp(name);
     if (sym) {
         if (sym->GetType() == SYMBOL_PARAM) {
@@ -86,11 +99,19 @@ string SymbolTable::GetAddress(string name) {
             return sym->GetName();
         } else if (sym->GetType() == SYMBOL_GLOBAL) {
             stringstream ss;
-            ss<<"global["<<sym->GetLoc()<<"]";
+            if (off == "") {
+                ss<<"global["<<sym->GetLoc()<<"]";
+            } else {
+                ss<<"global["<<sym->GetLoc()<<"+"<<off<<"]";
+            }
             return ss.str();
         } else {
             stringstream ss;
-            ss<<"local["<<sym->GetLoc()<<"]";
+            if (off == "") {
+                ss<<"local["<<sym->GetLoc()<<"]";
+            } else {
+                ss<<"local["<<sym->GetLoc()<<"+"<<off<<"]";
+            }
             return ss.str();
         }
     } else {
@@ -116,6 +137,14 @@ void SymbolTable::EnterWhile(Label& true_label, Label& false_label) {
 
 void SymbolTable::ExitWhile() {
     while_scopes.pop_back();
+}
+
+int SymbolTable::GetTempCount() {
+    return next_temp;
+}
+
+int SymbolTable::GetGlobalCount() {
+    return next_global;
 }
 
 Label& SymbolTable::GetTrueLabel() {
