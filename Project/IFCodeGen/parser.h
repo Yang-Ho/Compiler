@@ -1,3 +1,13 @@
+/*
+ * Yang Ho
+ * CSC 512
+ * parser.h
+ *
+ * Parser that is a mix between the sample solution and my own solution
+ * I used the overall structure and design (separating the grammar into a separate file) from the sample solution
+ *
+ * But used my own implementation of the algorithms and such
+ */
 #ifndef PARSER_H
 #define PARSER_H 
 
@@ -11,7 +21,6 @@
 using namespace::std;
 
 class Grammar;
-class Generator;
 
 class Parser {
     private:
@@ -20,6 +29,7 @@ class Parser {
         
         Grammar* grammar;                   // The grammar used
 
+        // Project 2 legacy code
         int num_variables;
         int num_functions;
         int num_statements;

@@ -1,3 +1,10 @@
+/*
+ * Yang Ho
+ * CSC 512
+ * token.h
+ *
+ * Token class used in project 1
+ */
 #ifndef TOKEN_H
 #define TOKEN_H 
 #include <string>

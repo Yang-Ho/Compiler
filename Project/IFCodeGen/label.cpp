@@ -1,3 +1,10 @@
+/*
+ * Yang Ho
+ * CSC 512
+ * label.cpp
+ *
+ * Implementation file for label.h 
+ */
 #include "label.h"
 
 #include <sstream>

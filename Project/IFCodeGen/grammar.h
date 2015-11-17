@@ -1,3 +1,14 @@
+/*
+ * Yang Ho
+ * CSC 512
+ * grammar.h
+ *
+ * Recursive descent parser for the grammar
+ * Original implementation is a mix between my own parser for project 2 and the sample on provided
+ *
+ * I used the overall structure, production rules, and organization of the sample
+ * But used my own implementation of the sample parser 
+ */
 #ifndef GRAMMAR_H
 #define GRAMMAR_H 
 #include "parser.h"

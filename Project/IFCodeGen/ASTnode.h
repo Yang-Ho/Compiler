@@ -1,3 +1,10 @@
+/*
+ * Yang Ho
+ * CSC 512
+ * ASTnode.h
+ *
+ * Header file for my abstract syntax tree implementation
+ */
 #ifndef ASTNODE_H
 #define ASTNODE_H 
 #include "label.h"
@@ -9,13 +16,24 @@
 
 using namespace::std;
 
-extern ofstream output;
+extern ofstream output; // Output file
+
+/*
+ * Base expression node for AST
+ * Expression is anything that doesn't end with a ; or has {}
+ */
 class ExprNode{
     public:
         virtual~ExprNode() {};
-        virtual string  genCode(SymbolTable* st) = 0;
+        virtual string  genCode(SymbolTable* st) = 0; // Generates code
 };
 
+/*
+ * Node for comparisons
+ *      left : left operand 
+ *      right : right operand 
+ *      op : ==, !=, >, >=, <, <= 
+ */
 class ComparisonExpr : public ExprNode {
     private:
         string op;
@@ -27,6 +45,12 @@ class ComparisonExpr : public ExprNode {
         virtual string  genCode(SymbolTable* st);
 };
 
+/*
+ * Node for conditions
+ *      left : left operand 
+ *      right : right operand 
+ *      op : &&, ||
+ */
 class ConditionExpr : public ExprNode {
     private:
         string op;
@@ -38,6 +62,12 @@ class ConditionExpr : public ExprNode {
         virtual string  genCode(SymbolTable* st);
 };
 
+/*
+ * Node for binary operations 
+ *      left : left operand 
+ *      right : right operand 
+ *      op : +, -, *, /
+ */
 class BinaryExpr : public ExprNode {
     private:
         string op;
@@ -49,6 +79,11 @@ class BinaryExpr : public ExprNode {
         virtual string  genCode(SymbolTable* st);
 };
 
+/*
+ * Node for unary operations 
+ *      child: operand 
+ *      op : don't know, our grammar doesn't really need this (i store negative numbers as negative numbers, not - and a number
+ */
 class UnaryExpr : public ExprNode {
     private:
         string op;
@@ -59,6 +94,10 @@ class UnaryExpr : public ExprNode {
         virtual string  genCode(SymbolTable* st);
 };
 
+/*
+ * Node for expressions in parens 
+ *      child: The expression
+ */
 class ParenExpr : public ExprNode {
     private:
         ExprNode * child;
@@ -68,6 +107,10 @@ class ParenExpr : public ExprNode {
         virtual string  genCode(SymbolTable* st);
 };
 
+/*
+ * Node for variables (ID's of variables, funcs, etc)
+ *      name : ID 
+ */
 class VariableExpr : public ExprNode {
     private:
         string name;
@@ -76,6 +119,10 @@ class VariableExpr : public ExprNode {
         virtual string  genCode(SymbolTable* st);
 };
 
+/*
+ * Node for numbers
+ *      val : number value in string format 
+ */
 class NumberExpr : public ExprNode {
     private:
         string val;
@@ -84,6 +131,11 @@ class NumberExpr : public ExprNode {
         virtual string  genCode(SymbolTable* st);
 };
 
+/*
+ * Node for a func call expression 
+ *      name : ID
+ *      args : list of arguments 
+ */
 class FuncCallExpr : public ExprNode {
     private:
         string name;
@@ -94,6 +146,11 @@ class FuncCallExpr : public ExprNode {
         virtual string  genCode(SymbolTable* st);
 };
 
+/*
+ * Node for a array reference expression
+ *      name : ID
+ *      index : the index being referenced 
+ */
 class ArrayRefExpr : public ExprNode {
     private:
         string name;
@@ -104,6 +161,10 @@ class ArrayRefExpr : public ExprNode {
         virtual string  genCode(SymbolTable* st);
 };
 
+/*
+ * Node for parameter list in func decl
+ *      params : list of parameters 
+ */
 class ParamListExpr : public ExprNode {
     private:
         vector<ExprNode*> * params;
@@ -113,6 +174,11 @@ class ParamListExpr : public ExprNode {
         virtual string  genCode(SymbolTable* st);
 };
 
+/*
+ * Node for specific paramaters
+ *      type : the type of the param 
+ *      name : the ID of the param 
+ */
 class ParamExpr : public ExprNode {
     private:
         string type;
@@ -122,12 +188,21 @@ class ParamExpr : public ExprNode {
         virtual string  genCode(SymbolTable* st);
 };
 
+/*
+ * Base class for stmt nodes of AST
+ * Statements are anything that end with ; or have {}
+ */
 class StmtNode{
     public:
         virtual~StmtNode() {}
         virtual void genCode(SymbolTable* st) = 0;
 };
 
+/* 
+ * Base Program statement
+ *      data_decls : list of global variables 
+ *      func_decls : list of func decls
+ */
 class ProgramStmt: public StmtNode {
     private:
         vector<StmtNode*>* data_decls;
@@ -138,6 +213,14 @@ class ProgramStmt: public StmtNode {
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * Func decl stmt
+ *      type : return type
+ *      name : ID
+ *      params : list of parameters
+ *      data_decls : declartion of local variables
+ *      body : main body of the program
+ */
 class FuncDeclStmt: public StmtNode {
     private:
         string type;
@@ -151,6 +234,11 @@ class FuncDeclStmt: public StmtNode {
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * Data declaration statements
+ *      type : variable types
+ *      ids : list of IDs
+ */
 class DataDeclsStmt: public StmtNode {
     private:
         string type;
@@ -161,6 +249,10 @@ class DataDeclsStmt: public StmtNode {
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * Block statements (statments in {})
+ *      statements : list of statements in the body
+ */
 class BlockStmt: public StmtNode {
     private:
         vector<StmtNode*> *statements;
@@ -170,6 +262,10 @@ class BlockStmt: public StmtNode {
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * Func call statement
+ *      See FuncCallExpr
+ */
 class FuncCallStmt: public StmtNode{
     private:
         string name;
@@ -180,6 +276,11 @@ class FuncCallStmt: public StmtNode{
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * Assignment statment
+ *      lhs : variable you're changing
+ *      rhs : what your storing into the lhs
+ */
 class AssignmentStmt: public StmtNode {
     private:
         ExprNode * lhs;
@@ -190,6 +291,11 @@ class AssignmentStmt: public StmtNode {
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * If statement
+ *      condition : the condition being checked
+ *      body : what to do if the condition is true
+ */
 class IfStmt : public StmtNode {
     private:
         ExprNode * condition;
@@ -200,6 +306,11 @@ class IfStmt : public StmtNode {
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * While statement
+ *      condition : the condition being checked
+ *      body : what to do if the condition is true
+ */
 class WhileStmt : public StmtNode {
     private:
         ExprNode * condition;
@@ -210,6 +321,10 @@ class WhileStmt : public StmtNode {
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * Return statement
+ *      expr : what to return
+ */
 class ReturnStmt : public StmtNode {
     private:
         ExprNode * expr;
@@ -219,18 +334,28 @@ class ReturnStmt : public StmtNode {
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * Break statement
+ */
 class BreakStmt : public StmtNode {
     private:
     public:
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * Continue statement
+ */
 class ContinueStmt : public StmtNode {
     private:
     public:
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * Read statement
+ *      name : what to read in
+ */
 class ReadStmt : public StmtNode {
     private:
         string name;
@@ -239,6 +364,10 @@ class ReadStmt : public StmtNode {
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * Write statement
+ *      expr : what to write
+ */
 class WriteStmt : public StmtNode {
     private:
         ExprNode *expr;
@@ -248,6 +377,10 @@ class WriteStmt : public StmtNode {
         virtual void genCode(SymbolTable* st);
 };
 
+/*
+ * Print statement
+ *      val : what to print
+ */
 class PrintStmt : public StmtNode {
     private:
         string val;

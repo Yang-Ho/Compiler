@@ -1,3 +1,8 @@
+/*
+ * Yang Ho
+ * CSC 512
+ * scanner.cpp
+ */
 #include "scanner.h"
 
 using namespace::std;

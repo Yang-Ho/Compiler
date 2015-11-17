@@ -1,5 +1,9 @@
-/* 
- * My recursive descent parser
+/*
+ * Yang Ho
+ * CSC 512
+ * grammar.cpp
+ *
+ * Implementation file for grammar.h 
  */
 #include "grammar.h"
 #include "token.h"

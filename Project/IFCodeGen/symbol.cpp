@@ -1,3 +1,10 @@
+/*
+ * Yang Ho
+ * CSC 512
+ * ASTnode.cpp
+ *
+ * Implementation file for ASTnode.h 
+ */
 #include "symbol.h"
 
 #include <vector>
@@ -8,9 +15,10 @@
 
 using namespace::std;
 
+// @Symbol
 Symbol::Symbol(string n, SymbolType t, int o)
     :name(n), type(t), offset(o) {
-    loc = 0;
+    loc = -1;
 }
 
 string Symbol::GetName() {
@@ -37,6 +45,7 @@ void Symbol::SetType(SymbolType t) {
     type = t;
 }
 
+// @SymbolTable
 int SymbolTable::next_temp = 0;
 
 SymbolTable::SymbolTable() {
@@ -56,28 +65,30 @@ SymbolTable::~SymbolTable() {
 }
 
 void SymbolTable::Insert(Symbol *sym) {
-    if (symbols.size() == 1 && sym->GetType() == SYMBOL_LOCAL) {
+    // Should add a check if symbol already is in the table
+    if (symbols.size() == 1 && sym->GetType() == SYMBOL_LOCAL) {  // Check if global variable
         sym->SetType(SYMBOL_GLOBAL);
         sym->SetLoc(next_global);
         next_global++;
-        next_global += sym->GetOffset();
+        next_global += sym->GetOffset();                //Compute offset next address
     } else if (sym->GetType() == SYMBOL_LOCAL) {
         sym->SetLoc(next_temp);
         next_temp++;
-        next_temp += sym->GetOffset();
+        next_temp += sym->GetOffset();                  // Compute offset next address
     }
     symbols.back()[sym->GetName()] = sym;
 }
 
 Symbol* SymbolTable::LookUp(string name) {
     vector<map<string, Symbol*> >::reverse_iterator vit;
+    // Search for name starting from the most recent scope
     for (vit = symbols.rbegin(); vit != symbols.rend(); ++vit) {
         map<string, Symbol*>::iterator mit = vit->find(name);
         if (mit != vit->end()) {
             return mit->second;
         }
     }
-    return NULL;
+    return NULL; // name not found
 }
 
 void SymbolTable::ResetTemp() {
@@ -94,7 +105,21 @@ string SymbolTable::GetAddress(string name, string off) {
     Symbol* sym = LookUp(name);
     if (sym) {
         if (sym->GetType() == SYMBOL_PARAM) {
-            return sym->GetName();
+            cout<<"SYMBOL PARAM: "<<name<<endl;
+            if (sym->GetLoc() < 0) {
+                cout<<"Setting new temp loc for param\n";
+                sym->SetLoc(next_temp);
+                return "Param";
+            } else {
+                cout<<"Getting temp loc for param\n";
+                stringstream ss;
+                if (off == "") {
+                    ss<<"local["<<sym->GetLoc()<<"]";
+                } else {
+                    ss<<"local["<<sym->GetLoc()<<"+"<<off<<"]";
+                }
+                return ss.str();
+            }
         } else if (sym->GetType() == SYMBOL_FUNC) {
             return sym->GetName();
         } else if (sym->GetType() == SYMBOL_GLOBAL) {

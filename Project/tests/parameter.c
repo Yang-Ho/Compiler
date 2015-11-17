@@ -10,7 +10,7 @@ void foo(int m,int n) {
 int main() {
     int a;
     read(a);
-    foo(a,a);
+    foo(a,3);
     write(a);
 }
 

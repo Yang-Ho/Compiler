@@ -1,3 +1,10 @@
+/*
+ * Yang Ho
+ * CSC 512
+ * token.cpp
+ *
+ * Implementation file for token.h 
+ */
 #include "token.h"
 
 Token::Token(string new_value, int new_id) {

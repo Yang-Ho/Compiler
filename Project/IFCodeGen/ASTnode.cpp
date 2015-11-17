@@ -1,3 +1,10 @@
+/*
+ * Yang Ho
+ * CSC 512
+ * ASTnode.cpp
+ *
+ * Implementation file for ASTnode.h 
+ */
 #include "ASTnode.h"
 #include "label.h"
 #include "symbol.h"
@@ -19,6 +26,10 @@ ComparisonExpr::~ComparisonExpr() {
     delete right;
 }
 
+/*
+ * Output is of form:
+ *      temp_address = left_address op right_address;
+ */
 string ComparisonExpr::genCode(SymbolTable* st) {
     //cout<<"Generating code: ComparisonExpr\n";
     string resultl = left->genCode(st);
@@ -38,6 +49,10 @@ ConditionExpr::~ConditionExpr() {
     delete right;
 }
 
+/*
+ * Output is of form:
+ *      temp_address = left_address op right_address;
+ */
 string ConditionExpr::genCode(SymbolTable* st) {
     //cout<<"Generating code: ConditionExpr\n";
     string resultl = left->genCode(st);
@@ -57,6 +72,10 @@ BinaryExpr::~BinaryExpr() {
     delete right;
 }
 
+/*
+ * Output is of form:
+ *      temp_address = left_address op right_address;
+ */
 string BinaryExpr::genCode(SymbolTable* st) {
     //cout<<"Generating code: BinaryExpr\n";
     string resultl = left->genCode(st);
@@ -75,6 +94,10 @@ UnaryExpr::~UnaryExpr() {
     delete child;
 }
 
+/*
+ * Output is of form:
+ *      temp_address = op child_address;
+ */
 string UnaryExpr::genCode(SymbolTable* st) {
     //cout<<"Generating code: UnaryExpr\n";
     string resultc = child->genCode(st);
@@ -92,12 +115,16 @@ ParenExpr::~ParenExpr() {
     delete child;
 }
 
+/*
+ * Output is of form:
+ *      temp_address = ( child_address );
+ */
 string ParenExpr::genCode(SymbolTable* st) {
     //cout<<"Generating code: ParenExpr\n";
     string resultc = child->genCode(st);
     string result = st->GetAddress();
 
-    output<<result<<"="<<"("<<resultc<<");\n";
+    output<<result<<"="<<resultc<<";\n";
     return result;
 }
 
@@ -105,13 +132,24 @@ string ParenExpr::genCode(SymbolTable* st) {
 VariableExpr::VariableExpr(string n)
     :name(n) {}
 
+/*
+ * Output is of form:
+ *      variable_address
+ *   OR
+ *      "nothing" 
+ */
 string VariableExpr::genCode(SymbolTable* st) {
-    //cout<<"Generating code: VariableExpr\n";
-    if (st->LookUp(name)) {
+    cout<<"Generating code: VariableExpr\n";
+    if (st->LookUp(name)) {                             // Check if already in symbol table
         string result = st->GetAddress(name);
+        if (result == "Param") {                        // Param first encountered, sogenerate the local address
+           result = st->GetAddress();
+           cout<<result<<"="<<name<<";\n";//@Temp
+           output<<result<<"="<<name<<";\n";
+        } 
         return result;
-    } else {
-        Symbol* sym = new Symbol(name, SYMBOL_LOCAL);
+    } else {                                            // Must be a decl, insert into table
+        Symbol* sym = new Symbol(name, SYMBOL_LOCAL);   
         st->Insert(sym);
         return "";
     }
@@ -121,12 +159,16 @@ string VariableExpr::genCode(SymbolTable* st) {
 NumberExpr::NumberExpr(string v)
     :val(v) {}
 
+/*
+ * Output is of form:
+ *      val
+ */
 string NumberExpr::genCode(SymbolTable* st) {
     //cout<<"Generating code: NumberExpr\n";
-    //string result = st->GetAddress();
+    string result = st->GetAddress();
 
-    //output<<result<<"="<<val<<";\n";
-    string result = val;
+    output<<result<<"="<<val<<";\n";
+    //string result = val;
     return result;
 }
 
@@ -142,6 +184,10 @@ FuncCallExpr::~FuncCallExpr() {
     delete args;
 }
 
+/*
+ * Output is of form:
+ *      temp_address = name(args_addresses); 
+ */
 string FuncCallExpr::genCode(SymbolTable* st) {
     //cout<<"Generating code: FuncCallExpr\n";
     string result = st->GetAddress();
@@ -177,17 +223,23 @@ ArrayRefExpr::~ArrayRefExpr() {
     delete index;
 }
 
+/*
+ * Output is of form:
+ *      variable_address
+ *   OR
+ *      "nothing" 
+ */
 string ArrayRefExpr::genCode(SymbolTable* st) {
     //cout<<"Generating code: ArrayRefExpr\n";
     string resulti = index->genCode(st);
-    if (st->LookUp(name)) {
+    if (st->LookUp(name)) {                             // Check if in symbol table
         string result = st->GetAddress(name, resulti);
         //output<<result;
         return result;
-    } else {
-        int offset = atoi(resulti.c_str());
+    } else {                                            // Must be a decl
+        int offset = atoi(resulti.c_str());             // Compute offset of storage
         Symbol* sym = new Symbol(name, SYMBOL_LOCAL, offset);
-        st->Insert(sym);
+        st->Insert(sym);                                // Insert variable
         return "";
     }
 }
@@ -203,6 +255,10 @@ ParamListExpr::~ParamListExpr() {
     delete params;
 }
 
+/*
+ * Output is of form:
+ *      params in , separated list
+ */
 string ParamListExpr::genCode(SymbolTable* st) {
     //cout<<"Generating code: ParamListExpr\n";
     vector<ExprNode*>::iterator pit;
@@ -219,13 +275,18 @@ string ParamListExpr::genCode(SymbolTable* st) {
 ParamExpr::ParamExpr(string t, string n)
     :type(t), name(n) {}
 
+/*
+ * Output is of form:
+ *      void
+ *   OR
+ *      type name
+ */
 string ParamExpr::genCode(SymbolTable* st) {
     //cout<<"Generating code: ParamExpr\n";
     string result = "";
     if (name != "") {
         Symbol * sym = new Symbol(name, SYMBOL_PARAM);
-        st->Insert(sym);
-        result = st->GetAddress(name);
+        st->Insert(sym);                                    // Inset symbol as param
         output<<type<<" "<<name;
     } else {
         output<<type;
@@ -250,12 +311,13 @@ ProgramStmt::~ProgramStmt() {
     delete func_decls;
 }
 
+// Generates program code
 void ProgramStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: ProgramStmt\n";
     vector<StmtNode*>::iterator ddit;
     vector<StmtNode*>::iterator fdit;
     st->EnterScope();
-    if (data_decls) {
+    if (data_decls) {  // Generate global variable codes
         for (ddit = data_decls->begin(); ddit != data_decls->end(); ++ddit) {
             (*ddit)->genCode(st);
         }
@@ -264,6 +326,7 @@ void ProgramStmt::genCode(SymbolTable* st) {
             output<<data_decls_type<<" global["<<st->GetGlobalCount()<<"];\n";
         }
     }
+    // Generate rest of code
     for (fdit = func_decls->begin(); fdit != func_decls->end(); ++fdit) {
         (*fdit)->genCode(st);
     }
@@ -288,24 +351,35 @@ FuncDeclStmt::~FuncDeclStmt() {
     delete body;
 }
 
+/*
+ * Output is of form:
+ *      type name ( params ) ;
+ *   OR 
+ *      type name ( params ) {
+ *          body
+ *      }
+ */
 void FuncDeclStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: FuncDeclStmt\n";
     output<<type<<" "<<name<<"(";
-    st->EnterScope();
+    st->EnterScope();       // Start new scope
     if (params) {
         params->genCode(st);
     }
     output<<")";
     if (data_decls) {
-        st->ResetTemp();
+        st->ResetTemp();    // Reset temp count
         output<<"{\n";
         long pos = output.tellp();
+        // Temp data decl line
         output<<"                                                       \n";
         vector<StmtNode*>::iterator ddit;
+        // Generate data decls code
         for (ddit = data_decls->begin(); ddit != data_decls->end(); ddit++) {
             if (*ddit)
                 (*ddit)->genCode(st);
         }
+        // Generate body code
         if (body) {
             vector<StmtNode*>::iterator bit;
             for (bit = body->begin(); bit != body->end(); bit++) {
@@ -340,16 +414,16 @@ DataDeclsStmt::~DataDeclsStmt() {
     delete ids;
 }
 
+// Generates code for each variable in data decl statement
 void DataDeclsStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: DataDeclsStmt\n";
-    if (ids) {// To do, figure out how many local vars are in a function
+    if (ids) {
         vector<ExprNode*>::iterator it;
         for (it = ids->begin(); it != ids->end(); it++) {
             if (*it) {
                 (*it)->genCode(st);
             }
         }
-        //output<<type<<" ["<<ids->size()<<"];\n";
     }
 }
 // @BlockStmt
@@ -364,6 +438,7 @@ BlockStmt::~BlockStmt() {
     delete statements;
 }
 
+// Generate code for block statement
 void BlockStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: BlockStmt\n";
     if (statements) {
@@ -386,6 +461,7 @@ FuncCallStmt::~FuncCallStmt() {
     delete args;
 }
 
+// Generate code for func statement, see FuncCallExpr
 void FuncCallStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: FuncCallStmt\n";
     if (args) {
@@ -418,6 +494,10 @@ AssignmentStmt::~AssignmentStmt() {
     delete rhs;
 }
 
+/*
+ * Output of form:
+ *      lhs_address = rhs_address;
+ */
 void AssignmentStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: AssignmentStmt\n";
     string resultl = lhs->genCode(st);
@@ -434,6 +514,14 @@ IfStmt::~IfStmt() {
     delete body;
 }
 
+/*
+ * Output of form:
+ *      if (condition_address) goto trueLabel;
+ *      goto falselabel;
+ *      truelabel:;
+ *      body_code
+ *      falseLabel:;
+ */
 void IfStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: IfStmt\n";
     Label trueLabel;
@@ -454,6 +542,16 @@ WhileStmt::~WhileStmt() {
     delete body;
 }
 
+/*
+ * Output of form:
+ *      startLabel:;
+ *      if (condition_address) goto trueLabel;
+ *      goto falseLabel;
+ *      truelabel:;
+ *      body_code
+ *      goto startLabel;
+ *      falseLabel:;
+ */
 void WhileStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: WhileStmt\n";
     Label startLabel;
@@ -465,7 +563,6 @@ void WhileStmt::genCode(SymbolTable* st) {
     output<<"if ("<<result<<") goto "<<trueLabel.str()<<";\n";
     output<<"goto "<<falseLabel.str()<<";\n";
     output<<trueLabel.str()<<":;\n";
-    //body->genCode(trueLabel, falseLabel);
     body->genCode(st);
     st->ExitWhile();
     output<<"goto "<<startLabel.str()<<";\n";
@@ -480,6 +577,10 @@ ReturnStmt::~ReturnStmt() {
     delete expr;
 }
 
+/*
+ * Output of form:
+ *      return expr_address;
+ */
 void ReturnStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: ReturnStmt\n";
     if (expr) {
@@ -491,12 +592,22 @@ void ReturnStmt::genCode(SymbolTable* st) {
 }
 
 // @BreakStmt
+
+/*
+ * Output of form:
+ *      goto falseLabel;
+ */
 void BreakStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: BreakStmt\n";
     output<<"goto "<<st->GetFalseLabel().str()<<";\n";
 }
 
 // @ContinueStmt
+
+/*
+ * Output of form:
+ *      goto trueLabel;
+ */
 void ContinueStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: ContinueStmt\n";
     output<<"goto "<<st->GetTrueLabel().str()<<";\n";
@@ -506,6 +617,10 @@ void ContinueStmt::genCode(SymbolTable* st) {
 ReadStmt::ReadStmt(string n)
     :name(n) {}
 
+/*
+ * Output of form:
+ *      read(name_address);
+ */
 void ReadStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: ReadStmt\n";
     if (st->LookUp(name)) {
@@ -525,6 +640,10 @@ WriteStmt::~WriteStmt() {
     delete expr;
 }
 
+/*
+ * Output of form:
+ *      write(expr_address);
+ */
 void WriteStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: WriteStmt\n";
     string result = expr->genCode(st);
@@ -535,6 +654,10 @@ void WriteStmt::genCode(SymbolTable* st) {
 PrintStmt::PrintStmt(string v)
     : val(v) {}
 
+/*
+ * Output of form:
+ *      print(val);
+ */
 void PrintStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: PrintStmt\n";
     output<<"print("<<val<<");\n";

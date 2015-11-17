@@ -1,5 +1,9 @@
-/* 
- * My recursive descent parser
+/*
+ * Yang Ho
+ * CSC 512
+ * ASTnode.cpp
+ *
+ * Implementation file for ASTnode.h 
  */
 #include "parser.h"
 #include "token.h"
@@ -28,6 +32,7 @@ Parser::~Parser() {
 
 }
 
+// Consume the current token and get the next one
 Token* Parser::Consume(TokenType t_type) {
     //cout<<"Consuming: "<<(*tokenIT)->GetTokenValue()<<"\n";
     ++tokenIT;
@@ -45,6 +50,7 @@ Token* Parser::Consume(TokenType t_type) {
     return *tokenIT;
 }
 
+// Return the current token
 Token* Parser::GetCurrToken() {
     if (tokenIT == tokens->end()) {
         return NULL;
@@ -65,6 +71,7 @@ void Parser::AddToken(Token *new_token) {
     tokens->push_back(new_token);
 }
 
+// Parse the grammar
 StmtNode *Parser::Parse() {
     tokenIT = tokens->begin();
     while (tokenIT != tokens->end() && (*tokenIT)->GetTokenType() == TOKEN_META) {

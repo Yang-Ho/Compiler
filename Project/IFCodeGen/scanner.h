@@ -1,3 +1,10 @@
+/*
+ * Yang Ho
+ * CSC 512
+ * scannar.h
+ *
+ * My Scanner from project 1
+ */
 #ifndef SCANNER_H
 #define SCANNER_H 
 
