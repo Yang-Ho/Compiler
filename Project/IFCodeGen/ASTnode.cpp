@@ -259,8 +259,10 @@ void ProgramStmt::genCode(SymbolTable* st) {
         for (ddit = data_decls->begin(); ddit != data_decls->end(); ++ddit) {
             (*ddit)->genCode(st);
         }
-        string data_decls_type = "int";
-        output<<data_decls_type<<" global["<<st->GetGlobalCount()<<"];\n";
+        if (st->GetGlobalCount() > 0) {
+            string data_decls_type = "int";
+            output<<data_decls_type<<" global["<<st->GetGlobalCount()<<"];\n";
+        }
     }
     for (fdit = func_decls->begin(); fdit != func_decls->end(); ++fdit) {
         (*fdit)->genCode(st);
@@ -288,7 +290,6 @@ FuncDeclStmt::~FuncDeclStmt() {
 
 void FuncDeclStmt::genCode(SymbolTable* st) {
     //cout<<"Generating code: FuncDeclStmt\n";
-    cout<<"In :"<<name<<endl; //@Temp
     output<<type<<" "<<name<<"(";
     st->EnterScope();
     if (params) {
@@ -299,7 +300,7 @@ void FuncDeclStmt::genCode(SymbolTable* st) {
         st->ResetTemp();
         output<<"{\n";
         long pos = output.tellp();
-        output<<"                              \n";
+        output<<"                                                       \n";
         vector<StmtNode*>::iterator ddit;
         for (ddit = data_decls->begin(); ddit != data_decls->end(); ddit++) {
             if (*ddit)
@@ -314,9 +315,11 @@ void FuncDeclStmt::genCode(SymbolTable* st) {
         }
         string data_decls_type = "int";
         long endpos = output.tellp();
-        output.seekp(pos);
-        output<<data_decls_type<<" local["<<st->GetTempCount()<<"];";
-        output.seekp(endpos);
+        if (st->GetTempCount() > 0) {
+            output.seekp(pos);
+            output<<data_decls_type<<" local["<<st->GetTempCount()<<"];";
+            output.seekp(endpos);
+        }
         output<<"}";
     } else {
         output<<";";
