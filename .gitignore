@@ -3,6 +3,7 @@
 *.exe
 filenames.txt
 
-Project/Scanner/*
-Project/Parser/*
-Project/tests/*.c
+Project/Scanner/
+Project/Parser/
+Project/tests/
+Project/tests/output/

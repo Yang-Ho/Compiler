@@ -1,2 +1,36 @@
-g++ main.cpp parser.cpp scanner.cpp grammar.cpp token.cpp symbol.cpp ASTnode.cpp address.cpp label.cpp -o compiler.exe
-makefile:6: recipe for target 'main' failed
+Input file: ../tests/mandel.c Successfully parsed the program!
+Generating code...
+Entering Scope: 
+In :square
+Inserting: x
+Entering Scope: 
+Exiting Scope: 
+In :complex_abs_squared
+Inserting: real
+Inserting: imag
+Entering Scope: 
+Exiting Scope: 
+In :check_for_bail
+Inserting: real
+Inserting: imag
+Entering Scope: 
+Exiting Scope: 
+In :absval
+Inserting: x
+Entering Scope: 
+Exiting Scope: 
+In :checkpixel
+Inserting: x
+Inserting: y
+Inserting: temp
+Inserting: iter
+Inserting: bail
+Entering Scope: 
+Exiting Scope: 
+In :main
+Inserting: on
+Entering Scope: 
+Exiting Scope: 
+Exiting Scope: 
+Done generating code
+Output file: ../tests/mandel_gen.c

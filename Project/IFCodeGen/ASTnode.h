@@ -125,7 +125,7 @@ class ParamExpr : public ExprNode {
 class StmtNode{
     public:
         virtual~StmtNode() {}
-        virtual void genCode(Label& next, SymbolTable* st) = 0;
+        virtual void genCode(SymbolTable* st) = 0;
 };
 
 class ProgramStmt: public StmtNode {
@@ -135,7 +135,7 @@ class ProgramStmt: public StmtNode {
     public:
         ProgramStmt(vector<StmtNode*>* d, vector<StmtNode*>* f);
         virtual~ProgramStmt();
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class FuncDeclStmt: public StmtNode {
@@ -148,7 +148,7 @@ class FuncDeclStmt: public StmtNode {
     public:
         FuncDeclStmt(string t, string n, ExprNode *p, vector<StmtNode*>* dd, vector<StmtNode*>* b);
         virtual~FuncDeclStmt();
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class DataDeclsStmt: public StmtNode {
@@ -158,7 +158,7 @@ class DataDeclsStmt: public StmtNode {
     public:
         DataDeclsStmt(string t, vector<ExprNode*>*i);
         virtual~DataDeclsStmt();
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class BlockStmt: public StmtNode {
@@ -167,7 +167,7 @@ class BlockStmt: public StmtNode {
     public:
         BlockStmt(vector<StmtNode*>*s);
         virtual~BlockStmt();
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class FuncCallStmt: public StmtNode{
@@ -177,7 +177,7 @@ class FuncCallStmt: public StmtNode{
     public:
         FuncCallStmt(string n, vector<ExprNode*> *a);
         virtual~FuncCallStmt();
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class AssignmentStmt: public StmtNode {
@@ -187,7 +187,7 @@ class AssignmentStmt: public StmtNode {
     public:
         AssignmentStmt(ExprNode *l, ExprNode *r);
         virtual~AssignmentStmt();
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class IfStmt : public StmtNode {
@@ -197,7 +197,7 @@ class IfStmt : public StmtNode {
     public:
         IfStmt(ExprNode *c, StmtNode *b);
         virtual~IfStmt();
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class WhileStmt : public StmtNode {
@@ -207,7 +207,7 @@ class WhileStmt : public StmtNode {
     public:
         WhileStmt(ExprNode *c, StmtNode *b);
         virtual~WhileStmt();
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class ReturnStmt : public StmtNode {
@@ -216,19 +216,19 @@ class ReturnStmt : public StmtNode {
     public:
         ReturnStmt(ExprNode* e);
         virtual~ReturnStmt();
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class BreakStmt : public StmtNode {
     private:
     public:
-        virtual void genCode(Label& no, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class ContinueStmt : public StmtNode {
     private:
     public:
-        virtual void genCode(Label& yes, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class ReadStmt : public StmtNode {
@@ -236,7 +236,7 @@ class ReadStmt : public StmtNode {
         string name;
     public:
         ReadStmt(string n);
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class WriteStmt : public StmtNode {
@@ -245,7 +245,7 @@ class WriteStmt : public StmtNode {
     public:
         WriteStmt(ExprNode* e);
         virtual~WriteStmt();
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 
 class PrintStmt : public StmtNode {
@@ -253,6 +253,6 @@ class PrintStmt : public StmtNode {
         string val;
     public:
         PrintStmt(string v);
-        virtual void genCode(Label& next, SymbolTable* st);
+        virtual void genCode(SymbolTable* st);
 };
 #endif /* ASTNODE_H */

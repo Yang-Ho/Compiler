@@ -16,6 +16,7 @@
 #include <fstream>
 #include <cstdio>
 #include <vector>
+#include <stdio.h>
 
 using namespace::std;
 
@@ -34,10 +35,6 @@ int main(int argc, char* argv[]) {
     Grammar *grammar = new Grammar();
     Parser parser(grammar);
 
-    string fileName = argv[1];
-    string output_file = fileName.substr(0, fileName.rfind('.'));
-    output_file += "_gen.c";
-    output.open(output_file.c_str());
     while (scanner.HasMoreTokens()) {
         Token* t = scanner.GetNextToken();
         if (t->GetTokenType() == TOKEN_ERROR) {
@@ -47,21 +44,26 @@ int main(int argc, char* argv[]) {
         } 
         parser.AddToken(t);
     }
+
+    string fileName = argv[1];
+    string output_file = fileName.substr(0, fileName.rfind('.'));
+    output_file += "_gen.c";
+    output.open(output_file.c_str());
+
     StmtNode * ast_tree = parser.Parse();
     if (ast_tree) {
         cout<<"Successfully parsed the program!\n";
-        Label l;
         cout<<"Generating code...\n";
         SymbolTable* symtab = new SymbolTable(); 
-        ast_tree->genCode(l, symtab);
+        ast_tree->genCode(symtab);
         cout<<"Done generating code\n";
         cout<<"Output file: "<<output_file<<"\n";
+        output.close(); 
     } else {
+        output.close(); 
         cout<<"Falied to parse\n";
+        remove(output_file.c_str());
     }
-    //delete grammar;
-    //delete ast_tree;
    
-    output.close(); 
     return 0;
 }
