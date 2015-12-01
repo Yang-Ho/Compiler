@@ -3,8 +3,10 @@
 *.exe
 *.zip
 filenames.txt
+TODO.txt
 
 Project/Scanner/
 Project/Parser/
 Project/tests/output/
 Project/tests/
+Project/BonusProject/
