@@ -139,12 +139,11 @@ VariableExpr::VariableExpr(string n)
  *      "nothing" 
  */
 string VariableExpr::genCode(SymbolTable* st) {
-    cout<<"Generating code: VariableExpr\n";
+    //cout<<"Generating code: VariableExpr\n";
     if (st->LookUp(name)) {                             // Check if already in symbol table
         string result = st->GetAddress(name);
         if (result == "Param") {                        // Param first encountered, sogenerate the local address
            result = st->GetAddress();
-           cout<<result<<"="<<name<<";\n";//@Temp
            output<<result<<"="<<name<<";\n";
         } 
         return result;

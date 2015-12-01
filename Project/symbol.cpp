@@ -105,13 +105,10 @@ string SymbolTable::GetAddress(string name, string off) {
     Symbol* sym = LookUp(name);
     if (sym) {
         if (sym->GetType() == SYMBOL_PARAM) {
-            cout<<"SYMBOL PARAM: "<<name<<endl;
             if (sym->GetLoc() < 0) {
-                cout<<"Setting new temp loc for param\n";
                 sym->SetLoc(next_temp);
                 return "Param";
             } else {
-                cout<<"Getting temp loc for param\n";
                 stringstream ss;
                 if (off == "") {
                     ss<<"local["<<sym->GetLoc()<<"]";
